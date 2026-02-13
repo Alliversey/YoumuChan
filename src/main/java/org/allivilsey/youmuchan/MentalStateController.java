@@ -18,7 +18,6 @@ public class MentalStateController {
 
     public MentalStateController(ProxyServer server) {
         this.server = server;
-
     }
 
     //外部周期调用
