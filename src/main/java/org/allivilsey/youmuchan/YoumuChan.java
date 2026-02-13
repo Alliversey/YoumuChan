@@ -17,7 +17,7 @@ public class YoumuChan {
 
     private final ProxyServer proxyServer;
 
-    private ChatMessageCollector chatMessageCollector;
+    private InGameInfoCollector inGameInfoCollector;
 
     @Inject
     public YoumuChan(ProxyServer proxyServer) {
@@ -29,9 +29,9 @@ public class YoumuChan {
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
 
-        chatMessageCollector = new ChatMessageCollector(5 * 60 * 1000);
+        inGameInfoCollector = new InGameInfoCollector(5 * 60 * 1000);
 
-        EventListener listener = new EventListener(chatMessageCollector);
+        InGameInfoListener listener = new InGameInfoListener(inGameInfoCollector);
 
         proxyServer.getEventManager().register(this, listener);
     }

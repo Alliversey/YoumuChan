@@ -1,6 +1,8 @@
 package org.allivilsey.youmuchan;
 
-public class ChatMessage {
+public class InGameInfo {
+
+    private final InfoType type;
 
     private final String playerName;
 
@@ -11,7 +13,8 @@ public class ChatMessage {
     private final Long timestamp;
 
     //聊天消息数据对象
-    public ChatMessage(String playerName, String serverName, String content) {
+    public InGameInfo(InfoType type, String playerName, String serverName, String content) {
+        this.type = type;
         this.playerName = playerName;
         this.serverName = serverName;
         this.content = content;
@@ -19,6 +22,10 @@ public class ChatMessage {
     }
 
     //获取方法⬇
+    public InfoType getInfoType() {
+        return type;
+    }
+
     public String getPlayerName() {
         return playerName;
     }
