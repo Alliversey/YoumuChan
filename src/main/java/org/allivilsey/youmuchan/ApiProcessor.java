@@ -28,32 +28,38 @@ public class ApiProcessor {
     }
 
     //发送用户消息，返回AI回复文本
-    public String sendToApi(String model, String systemMessage, String userMessage, Float temperature) throws IOException {
+    public String sendToApi(AIContext context) throws IOException {
+
         JsonObject root = new JsonObject();
 
         //指定模型
-        root.addProperty("model", model);
+        root.addProperty("model", context.getModel());
 
-        //构造消息组
         JsonArray messages = new JsonArray();
 
-        //构造system message
-        JsonObject system = new JsonObject();
-        system.addProperty("role", "system");
-        system.addProperty("content", systemMessage);
-        messages.add(system);
+        //设置系统提示词
+        if (context.getSystemPrompt() != null) {
+            JsonObject system = new JsonObject();
+            system.addProperty("role", "system");
+            system.addProperty("content", context.getSystemPrompt());
+            messages.add(system);
+        }
 
-        //构造user message
-        JsonObject user = new JsonObject();
-        user.addProperty("role", "user");
-        user.addProperty("content", userMessage);
-        messages.add(user);
+        //设置提示词
+        if (context.getUserPrompt() != null) {
+            JsonObject user = new JsonObject();
+            user.addProperty("role", "user");
+            user.addProperty("content", context.getUserPrompt());
+            messages.add(user);
+        }
 
-        //message加入根对象
         root.add("messages", messages);
 
-        //温度加入根对象
-        root.addProperty("temperature", temperature);
+        //设置对话温度
+        if (context.getTemperature() != null) {
+            root.addProperty("temperature",context.getTemperature());
+        }
+
 
         //将JSON字符串包装为请求
         RequestBody body = RequestBody.create(root.toString(), JSON);
