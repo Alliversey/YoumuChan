@@ -43,7 +43,7 @@ public class MentalStateController {
             return MentalState.SLEEP;
         }
 
-        //默认休眠
+        //进入对话模式
         return MentalState.DREAM;
     }
 

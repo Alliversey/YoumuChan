@@ -9,10 +9,15 @@ public class InGameInfoCollector {
 
     private final Deque<InGameInfo> infoBuffer = new ConcurrentLinkedDeque<>();
 
+    //记录时间限制
     private final long maxCacheDurationMillis;
 
-    public InGameInfoCollector(long maxCacheDurationMillis) {
+    //记录条目数量限制
+    private final int maxBufferSize;
+
+    public InGameInfoCollector(long maxCacheDurationMillis, int maxBufferSize) {
         this.maxCacheDurationMillis = maxCacheDurationMillis;
+        this.maxBufferSize = maxBufferSize;
     }
 
     //添加新数据
@@ -24,7 +29,7 @@ public class InGameInfoCollector {
         clearOldInfo();
     }
 
-    //清除旧消息
+    //清除过期数据
     private void clearOldInfo() {
 
         long now = System.currentTimeMillis();
@@ -42,6 +47,13 @@ public class InGameInfoCollector {
             } else {
                 break;
             }
+        }
+    }
+
+    //清除过多数据
+    private void enforceSizeLimit() {
+        while (infoBuffer.size() > maxBufferSize) {
+            infoBuffer.pollFirst();
         }
     }
 
@@ -94,8 +106,13 @@ public class InGameInfoCollector {
     }
 
     //获取缓存量
-    public int getMessageListSize() {
+    public int getInfoListSize() {
         return infoBuffer.size();
+    }
+
+    //数据重置
+    public void clearInfo() {
+        infoBuffer.clear();
     }
 
 }

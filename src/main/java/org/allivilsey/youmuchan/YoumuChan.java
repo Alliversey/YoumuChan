@@ -29,7 +29,7 @@ public class YoumuChan {
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
 
-        inGameInfoCollector = new InGameInfoCollector(5 * 60 * 1000);
+        inGameInfoCollector = new InGameInfoCollector(5 * 60 * 1000, 50);
 
         InGameInfoListener listener = new InGameInfoListener(inGameInfoCollector);
 
