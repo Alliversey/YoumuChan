@@ -21,23 +21,23 @@ public class InGameInfo {
         this.timestamp = System.currentTimeMillis();
     }
 
-    //获取方法⬇
+    //获取方法数据类型
     public InfoType getInfoType() {
         return type;
     }
-
+    //获取玩家名
     public String getPlayerName() {
         return playerName;
     }
-
+    //获取服务器名
     public String getServerName() {
         return serverName;
     }
-
+    //获取数据内容
     public String getContent() {
         return content;
     }
-
+    //获取时间戳
     public Long getTimestamp() {
         return timestamp;
     }
