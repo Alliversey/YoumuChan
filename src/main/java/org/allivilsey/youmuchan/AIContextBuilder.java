@@ -19,6 +19,7 @@ public class AIContextBuilder {
         this.timeWindowMillis = timeWindowMillis;
     }
 
+    //构建AIContext
     public AIContext build(String targetPlayer, MentalState state) {
         AIContext context = new AIContext(defaultModel, defaultTemperature);
         context.setTargetPlayer(targetPlayer);
@@ -34,6 +35,7 @@ public class AIContextBuilder {
         return context;
     }
 
+    //根据心理状态过滤信息
     private List<InGameInfo> filerByState(List<InGameInfo> raw, String targetPlayer, MentalState state) {
         switch (state) {
             case SLEEP -> {
