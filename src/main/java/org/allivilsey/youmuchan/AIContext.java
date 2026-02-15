@@ -57,6 +57,35 @@ public class AIContext {
         return userPrompt;
     }
 
+    public List<InGameInfo> getRawInfos() {
+        return rawInfos;
+    }
+
+    public List<InGameInfo> getFilteredInfos() {
+        return filteredInfos;
+    }
+
+    public boolean isInjectionRisk() {
+        return injectionRisk;
+    }
+
+    public String getEmotion() {
+        return emotion;
+    }
+
+    public boolean isWikiRequired() {
+        return wikiRequired;
+    }
+
+    public String getTargetPlayer() {
+        return targetPlayer;
+    }
+
+    //SETTER
+    public void setRawInfos(List<InGameInfo> rawInfos) {
+        this.rawInfos = rawInfos;
+    }
+
     public void setSystemPrompt(String systemPrompt) {
         this.systemPrompt = systemPrompt;
     }
@@ -65,48 +94,20 @@ public class AIContext {
         this.userPrompt = userPrompt;
     }
 
-    public List<InGameInfo> getRawInfos() {
-        return rawInfos;
-    }
-
-    public void setRawInfos(List<InGameInfo> rawInfos) {
-        this.rawInfos = rawInfos;
-    }
-
-    public List<InGameInfo> getFilteredInfos() {
-        return filteredInfos;
-    }
-
     public void setFilteredInfos(List<InGameInfo> filteredInfos) {
         this.filteredInfos = filteredInfos;
-    }
-
-    public boolean isInjectionRisk() {
-        return injectionRisk;
     }
 
     public void setInjectionRisk(boolean injectionRisk) {
         this.injectionRisk = injectionRisk;
     }
 
-    public String getEmotion() {
-        return emotion;
-    }
-
     public void setEmotion(String emotion) {
         this.emotion = emotion;
     }
 
-    public boolean isWikiRequired() {
-        return wikiRequired;
-    }
-
     public void setWikiRequired(boolean wikiRequired) {
         this.wikiRequired = wikiRequired;
-    }
-
-    public String getTargetPlayer() {
-        return targetPlayer;
     }
 
     public void setTargetPlayer(String targetPlayer) {
