@@ -2,6 +2,7 @@ package org.allivilsey.youmuchan;
 
 import java.util.stream.Collectors;
 
+//处理守门员模型提示词
 public class AIBorderPromptFormatter implements PromptFormatter{
 
     @Override

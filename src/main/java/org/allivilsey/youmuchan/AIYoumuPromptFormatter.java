@@ -2,6 +2,7 @@ package org.allivilsey.youmuchan;
 
 import java.util.stream.Collectors;
 
+//处理聊天模型提示词
 public class AIYoumuPromptFormatter implements PromptFormatter{
 
     @Override
@@ -21,6 +22,7 @@ public class AIYoumuPromptFormatter implements PromptFormatter{
                 In game log: 
                 %s
                 """.formatted(chatContext);
+
         context.setSystemPrompt(systemPrompt);
         context.setUserPrompt(userPrompt);
     }
