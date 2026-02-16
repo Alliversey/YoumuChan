@@ -27,6 +27,7 @@ public class AIBorderPromptFormatter implements PromptFormatter{
         //拼接用户提示词
         String userPrompt = """
                 Analyze the following data:
+                %s
                 """.formatted(infoText);
 
         //设置系统/用户提示词
