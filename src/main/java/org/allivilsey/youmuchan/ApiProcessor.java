@@ -6,7 +6,7 @@ import okhttp3.*;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class ApiProcessor {
+public class ApiProcessor{
 
     //声明JSON类型
     private static final MediaType JSON
