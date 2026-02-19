@@ -113,4 +113,12 @@ public class AIContext {
     public void setTargetPlayer(String targetPlayer) {
         this.targetPlayer = targetPlayer;
     }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public void setTemperature(Float temperature) {
+        this.temperature = temperature;
+    }
 }
