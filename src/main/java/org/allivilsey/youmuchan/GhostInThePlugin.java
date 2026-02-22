@@ -41,9 +41,9 @@ public class GhostInThePlugin {
         this.baseInterval = baseInterval;
     }
 
+    //启动妖梦酱
     public void youmuStart() {
         if (!running.compareAndSet(false, true)) return;
-
         nextPulseTime = System.currentTimeMillis();
         scheduleNextTick();
     }
@@ -62,6 +62,7 @@ public class GhostInThePlugin {
 
             MentalState state = mentalStateController.getCurrentMentalState();
 
+            //SLEEP状态下休眠
             if (state == MentalState.SLEEP) {
                 aiBusy.set(false);
                 nextPulseTime = now + baseInterval;
