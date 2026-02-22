@@ -89,7 +89,7 @@ public class GhostInThePlugin {
             try {
                 String target = focusController.getCurrentFocus();
                 String reply = passageway.pass(target, state);
-                messageSender.send();
+                messageSender.send(reply);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
