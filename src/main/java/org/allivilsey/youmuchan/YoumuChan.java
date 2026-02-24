@@ -46,15 +46,15 @@ public class YoumuChan {
 
         ConfigurationNode config = loadConfig();
 
-        String apiKey = config.node("api-key").getString("your-api-key");
-        String borderModel = config.node("border-model").getString("qwen-plus");
-        float borderTemperature = (float) config.node("border-temperature").getDouble(0.0D);
-        String youmuModel = config.node("youmu-model").getString("qwen-plus");
-        float youmuTemperature = (float) config.node("youmu-temperature").getDouble(0.7D);
-        long timeWindowMs = config.node("time-window-ms").getLong(60000L);
-        long baseIntervalMs = config.node("base-interval-ms").getLong(15000L);
-        long cacheDurationMs = config.node("cache-duration-ms").getLong(300000L);
-        int cacheMaxSize = config.node("cache-max-size").getInt(100);
+        String apiKey = config.node("api_key").getString("your-api-key");
+        String borderModel = config.node("border_model").getString("qwen-plus");
+        float borderTemperature = (float) config.node("border_temperature").getDouble(0.0D);
+        String youmuModel = config.node("youmu_model").getString("qwen-plus");
+        float youmuTemperature = (float) config.node("youmu_temperature").getDouble(0.7D);
+        long timeWindowMs = config.node("time_window_ms").getLong(60000L);
+        long baseIntervalMs = config.node("base_interval_ms").getLong(15000L);
+        long cacheDurationMs = config.node("cache_duration_ms").getLong(300000L);
+        int cacheMaxSize = config.node("cache_max_size").getInt(100);
 
         logger.info("YoumuChan 正在启动");
 

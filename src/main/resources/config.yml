@@ -1,15 +1,15 @@
 ﻿# YoumuChan 默认配置
 
-api-key: your-api-key
+api_key: your-api-key
 
-border-model: qwen-plus
-border-temperature: 0.0
+border_model: qwen-plus
+border_temperature: 0.0
 
-youmu-model: qwen-plus
-youmu-temperature: 0.7
+youmu_model: qwen-plus
+youmu_temperature: 0.7
 
-time-window-ms: 60000
-base-interval-ms: 15000
+time_window_ms: 60000
+base_interval_ms: 15000
 
-cache-duration-ms: 300000
-cache-max-size: 100
+cache_duration_ms: 300000
+cache_max_size: 100
