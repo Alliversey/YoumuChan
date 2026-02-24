@@ -1,16 +1,17 @@
 package org.allivilsey.youmuchan;
 
 import com.google.inject.Inject;
-import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Properties;
 
 @Plugin(
         id = "youmuchan",
@@ -43,35 +44,45 @@ public class YoumuChan {
             return;
         }
 
-        Properties config = loadConfig();
+        ConfigurationNode config = loadConfig();
+
+        String apiKey = config.node("api-key").getString("your-api-key");
+        String borderModel = config.node("border-model").getString("qwen-plus");
+        float borderTemperature = (float) config.node("border-temperature").getDouble(0.0D);
+        String youmuModel = config.node("youmu-model").getString("qwen-plus");
+        float youmuTemperature = (float) config.node("youmu-temperature").getDouble(0.7D);
+        long timeWindowMs = config.node("time-window-ms").getLong(60000L);
+        long baseIntervalMs = config.node("base-interval-ms").getLong(15000L);
+        long cacheDurationMs = config.node("cache-duration-ms").getLong(300000L);
+        int cacheMaxSize = config.node("cache-max-size").getInt(100);
 
         logger.info("YoumuChan 正在启动");
 
         InGameInfoCollector collector = new InGameInfoCollector(
-                Long.parseLong(config.getProperty("cache-duration-ms")),
-                Integer.parseInt(config.getProperty("cache-max-size"))
+                cacheDurationMs,
+                cacheMaxSize
         );
 
         proxyServer.getEventManager().register(this, new InGameInfoListener(collector));
 
         AIContextBuilder contextBuilder = new AIContextBuilder(
                 collector,
-                config.getProperty("youmu-model"),
-                Float.parseFloat(config.getProperty("youmu-temperature")),
-                Long.parseLong(config.getProperty("time-window-ms"))
+                youmuModel,
+                youmuTemperature,
+                timeWindowMs
         );
 
-        ApiProcessor apiProcessor = new ApiProcessor(config.getProperty("api-key"));
+        ApiProcessor apiProcessor = new ApiProcessor(apiKey);
 
         KaianPassageway passageway = new KaianPassageway(
                 contextBuilder,
                 new AIBorderPromptFormatter(),
                 new AIYoumuPromptFormatter(),
                 apiProcessor,
-                config.getProperty("broder-model"),
-                Float.parseFloat(config.getProperty("broder-temperature")),
-                config.getProperty("youmu-moder"),
-                Float.parseFloat(config.getProperty("youmu-temperature"))
+                borderModel,
+                borderTemperature,
+                youmuModel,
+                youmuTemperature
         );
 
         MentalStateController mentalStateController = new MentalStateController(proxyServer);
@@ -85,7 +96,7 @@ public class YoumuChan {
                 mentalStateController,
                 focusController,
                 messageSender,
-                Long.parseLong(config.getProperty("base-interval-ms"))
+                baseIntervalMs
         );
 
         ghostInThePlugin.youmuStart();
@@ -93,31 +104,37 @@ public class YoumuChan {
         logger.info("YoumuChan 已启动");
     }
 
-    private Properties loadConfig() {
+    private ConfigurationNode loadConfig() {
 
-        Path configFile = dataDirectory.resolve("config.properties");
+        Path configFile = dataDirectory.resolve("config.yml");
 
         if (Files.notExists(configFile)) {
             saveDefaultFile(configFile);
         }
 
-        Properties properties = new Properties();
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+                .path(configFile)
+                .build();
 
         try {
-            properties.load(Files.newInputStream(configFile));
+            return loader.load();
         } catch (IOException e) {
-            logger.error("配置文件加载失败: " + e);
+            logger.error("配置文件加载失败", e);
         }
 
-        return properties;
+        return loader.createNode();
     }
 
     private void saveDefaultFile(Path file) {
 
-        try (var in = getClass().getResourceAsStream("/config.properties")) {
+        try (var in = getClass().getResourceAsStream("/config.yml")) {
+            if (in == null) {
+                logger.error("未找到默认配置文件: /config.yml");
+                return;
+            }
             Files.copy(in, file);
         } catch (IOException e) {
-            logger.error("配置文件设置失败: " + e);
+            logger.error("配置文件设置失败", e);
         }
     }
 }
