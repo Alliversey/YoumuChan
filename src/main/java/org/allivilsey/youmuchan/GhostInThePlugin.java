@@ -60,6 +60,7 @@ public class GhostInThePlugin {
 
         if (now >= nextPulseTime && aiBusy.compareAndSet(false, true)) {
 
+            mentalStateController.evaluate();
             MentalState state = mentalStateController.getCurrentMentalState();
 
             //SLEEP状态下休眠
