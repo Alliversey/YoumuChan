@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -36,7 +37,6 @@ public class YoumuChan {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
-
         try {
             Files.createDirectories(dataDirectory);
         } catch (IOException e) {
@@ -56,6 +56,7 @@ public class YoumuChan {
         long cacheDurationMs = config.node("cache_duration_ms").getLong(300000L);
         int cacheMaxSize = config.node("cache_max_size").getInt(100);
         double halfLifeSeconds = config.node("half_life_seconds").getDouble(30.0);
+        String fictionalPlayerName = config.node("fictional_player_name").getString("YoumuChan");
 
         logger.info("YoumuChan 正在启动");
 
@@ -92,7 +93,10 @@ public class YoumuChan {
 
         MentalStateController mentalStateController = new MentalStateController(proxyServer);
         FocusController focusController = new FocusController();
-        MessageSender messageSender = new MessageSender();
+
+        YoumuVirtualize youmuVirtualize = new YoumuVirtualize();
+        Player fictionalPlayer = youmuVirtualize.create(fictionalPlayerName);
+        MessageSender messageSender = new MessageSender(proxyServer, logger, fictionalPlayer);
 
         ghostInThePlugin = new GhostInThePlugin(
                 proxyServer,
@@ -111,7 +115,6 @@ public class YoumuChan {
     }
 
     private ConfigurationNode loadConfig() {
-
         Path configFile = dataDirectory.resolve("config.yml");
 
         if (Files.notExists(configFile)) {
@@ -132,7 +135,6 @@ public class YoumuChan {
     }
 
     private void saveDefaultFile(Path file) {
-
         try (var in = getClass().getResourceAsStream("/config.yml")) {
             if (in == null) {
                 logger.error("未找到默认配置文件: /config.yml");
