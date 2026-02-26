@@ -6,14 +6,16 @@ import java.util.stream.Collectors;
 public class AIContextBuilder {
 
     private final InGameInfoCollector collector;
+    private final HeatController heatController;
 
     private final String defaultModel;
     private final float defaultTemperature;
 
     private final long timeWindowMillis;
 
-    public AIContextBuilder(InGameInfoCollector collector, String defaultModel, float defaultTemperature, long timeWindowMillis) {
+    public AIContextBuilder(InGameInfoCollector collector, HeatController heatController ,String defaultModel, float defaultTemperature, long timeWindowMillis) {
         this.collector = collector;
+        this.heatController = heatController;
         this.defaultModel = defaultModel;
         this.defaultTemperature = defaultTemperature;
         this.timeWindowMillis = timeWindowMillis;
@@ -24,7 +26,9 @@ public class AIContextBuilder {
         AIContext context = new AIContext(defaultModel, defaultTemperature);
         context.setTargetPlayer(targetPlayer);
 
-        List<InGameInfo> rawInfos = collector.getInfoByTime(timeWindowMillis);
+        long dynamicWindow = (long) (timeWindowMillis * heatController.getHeat());
+
+        List<InGameInfo> rawInfos = collector.getInfoByTime(dynamicWindow);
 
         context.setRawInfos(rawInfos);
 

@@ -25,7 +25,7 @@ public class HeatControllerListener {
     @Subscribe
     public void mentionedName(PlayerChatEvent event) {
         if (event.getMessage().contains("妖梦")) {
-            heatController.addFuel(2.0);
+            heatController.addFuel(3.0);
         }
     }
 }

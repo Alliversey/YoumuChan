@@ -67,9 +67,11 @@ public class YoumuChan {
         HeatController heatController = new HeatController(halfLifeSeconds);
 
         proxyServer.getEventManager().register(this, new InGameInfoListener(collector));
+        proxyServer.getEventManager().register(this, new HeatControllerListener(heatController));
 
         AIContextBuilder contextBuilder = new AIContextBuilder(
                 collector,
+                heatController,
                 youmuModel,
                 youmuTemperature,
                 timeWindowMs
