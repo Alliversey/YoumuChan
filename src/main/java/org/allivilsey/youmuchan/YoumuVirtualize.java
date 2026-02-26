@@ -36,7 +36,8 @@ public class YoumuVirtualize {
         private final GameProfile gameProfile;
         private final InetSocketAddress mockAddress;
 
-        // 使用一个极简的内部类来应付其他插件对 PlayerSettings 和 TabList 的获取
+        // 为 PlayerSettings 和 TabList 提供稳定的占位实现，
+        // 使依赖这些接口的第三方插件在读取虚拟玩家信息时不会因缺失对象而失败。
         private final PlayerSettings dummySettings = new DummyPlayerSettings();
         private final TabList dummyTabList = new DummyTabList();
 
@@ -59,7 +60,7 @@ public class YoumuVirtualize {
         @Override public InetSocketAddress getRemoteAddress() { return mockAddress; }
 
         // --- 兼容性占位 (Compatibility Stubs) ---
-        // 返回 Optional.empty() 防止其他插件报 NullPointerException
+        // 对虚拟玩家不存在的连接态信息返回 Optional.empty()，显式表达“无后端连接上下文”。
         @Override public Optional<ServerConnection> getCurrentServer() { return Optional.empty(); }
         @Override public Optional<InetSocketAddress> getVirtualHost() { return Optional.empty(); }
         @Override public Optional<ModInfo> getModInfo() { return Optional.empty(); }
@@ -67,14 +68,15 @@ public class YoumuVirtualize {
 
         // --- 权限与协议 (Permissions & Protocol) ---
         @Override public Tristate getPermissionValue(String permission) {
-            // 如果你的机器人需要特定权限（如跨服聊天权限），可以在这里写简单的判断逻辑
-            // 默认返回未定义，交由底层的权限插件接管（虽然机器人通常不需要）
+            // 当前实现不直接声明权限结论，返回 UNDEFINED 以允许外部权限系统继续决策。
+            // 若后续需要为虚拟玩家注入权限，可在此基于 permission 做精确映射。
             return Tristate.UNDEFINED;
         }
         @Override public ProtocolVersion getProtocolVersion() { return ProtocolVersion.MAXIMUM_VERSION; }
         @Override public ProtocolState getProtocolState() { return ProtocolState.PLAY; }
 
-        // --- Adventure/Velocity 接口要求，但对机器人无用的方法 (No-ops) ---
+        // --- Adventure/Velocity 接口要求的最小可用实现 (No-ops) ---
+        // 以下方法用于满足 Player 接口契约；在当前虚拟玩家场景中不参与实际网络交互。
         @Override public PlayerSettings getPlayerSettings() { return dummySettings; }
         @Override public TabList getTabList() { return dummyTabList; }
         @Override public Locale getEffectiveLocale() { return Locale.CHINA; }
@@ -119,7 +121,7 @@ public class YoumuVirtualize {
                     .build();
         }
 
-        // --- 极简内部类：应付那些试图读取玩家设置/Tab的聊天插件 ---
+        // --- 内部占位实现：为读取玩家设置与 Tab 的插件提供可预测返回值 ---
         private static final class DummyPlayerSettings implements PlayerSettings {
             @Override public Locale getLocale() { return Locale.CHINA; }
             @Override public byte getViewDistance() { return 12; }
@@ -140,7 +142,8 @@ public class YoumuVirtualize {
             @Override public Collection<TabListEntry> getEntries() { return List.of(); }
             @Override public void clearAll() {}
             @Override public TabListEntry buildEntry(GameProfile profile, Component displayName, int latency, int gameMode, ChatSession chatSession, boolean listed) {
-                return null; // 对于虚构玩家，不需要构建真实的 Tab 实体
+                // 虚拟玩家不维护真实 Tab 状态，返回 null 表示不创建条目对象。
+                return null;
             }
         }
     }

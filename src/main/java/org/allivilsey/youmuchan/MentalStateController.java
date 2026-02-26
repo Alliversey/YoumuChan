@@ -8,19 +8,19 @@ public class MentalStateController {
 
     private final ProxyServer server;
 
-    //设置默认状态
+    // 控制器初始化时默认处于 SLEEP，避免插件刚启动就触发主动发言。
     private MentalState currentMentalState = MentalState.SLEEP;
 
-    //下次状态切换时间
+    // 下一次允许状态切换的时间戳（毫秒）。
     private long nextStateChangeTime = 0L;
-    //状态切换冷却时间
+    // 默认状态切换冷却时长，用于抑制短时间内频繁抖动。
     private final long defaultCooldownMilliseconds = 60_000L;
 
     public MentalStateController(ProxyServer server) {
         this.server = server;
     }
 
-    //外部周期调用
+    // 由外部调度器周期调用：按当前环境重新评估目标状态，并在满足冷却条件时执行切换。
     public void evaluate() {
         MentalState decideState = decideState();
 
@@ -29,42 +29,43 @@ public class MentalStateController {
         }
     }
 
-    //默认决策逻辑
+    // 默认决策逻辑：依据北京时间与在线人数在 SLEEP 和 DREAM 间切换。
     private MentalState decideState() {
 
-        //获取当前时间（小时）
+        // 获取北京时间的小时值，作为昼夜判定依据。
         int hour = LocalTime.now(java.time.ZoneId.of("Asia/Shanghai")).getHour();
 
-        //获取在线玩家数量
+        // 获取代理当前在线人数。
         int onlinePlayers = server.getPlayerCount();
 
-        //无人or夜间休眠
+        // 在线人数为 0 或时间早于 10:00 时进入休眠，以减少空场景下的无效调用。
         if (onlinePlayers == 0 || hour < 10) {
             return MentalState.SLEEP;
         }
 
-        //进入对话模式
+        // 其余场景进入对话模式，允许后续 AI 周期生成回复。
         return MentalState.DREAM;
     }
 
-    //切换状态
+    // 设置当前状态并刷新下一次切换时间。
+    // duration == -1 表示无限期锁定当前状态（直到外部再次显式设置）。
     public void setMentalState(MentalState mentalState, long duration) {
         currentMentalState = mentalState;
 
         if (duration == -1) {
-            nextStateChangeTime = Long.MAX_VALUE;//duration参数为-1时锁定状态
+            nextStateChangeTime = Long.MAX_VALUE;
         } else {
             long now = System.currentTimeMillis();
             nextStateChangeTime = now + duration;
         }
     }
 
-    //查询状态
+    // 返回当前心智状态，供调度器与业务流程判断是否执行对话链路。
     public MentalState getCurrentMentalState() {
         return currentMentalState;
     }
 
-    //检测状态切换冷却
+    // 仅当目标状态与当前状态不同且已超过冷却窗口时，才允许状态切换。
     private boolean canSwitch(MentalState mentalState) {
         if (currentMentalState == mentalState) {
             return false;

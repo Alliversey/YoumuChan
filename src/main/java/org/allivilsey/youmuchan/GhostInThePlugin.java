@@ -41,7 +41,7 @@ public class GhostInThePlugin {
         this.baseInterval = baseInterval;
     }
 
-    //启动妖梦酱
+    // 启动 AI 调度循环；若已在运行则直接返回，避免重复注册任务链。
     public void youmuStart() {
         if (!running.compareAndSet(false, true)) return;
         nextPulseTime = System.currentTimeMillis();
@@ -63,7 +63,7 @@ public class GhostInThePlugin {
             mentalStateController.evaluate();
             MentalState state = mentalStateController.getCurrentMentalState();
 
-            //SLEEP状态下休眠
+            // 在 SLEEP 状态下跳过本轮推理，仅推进下一次触发时间。
             if (state == MentalState.SLEEP) {
                 aiBusy.set(false);
                 nextPulseTime = now + baseInterval;

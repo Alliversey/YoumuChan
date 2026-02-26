@@ -99,7 +99,7 @@ public class ApiProcessor{
 
         JsonArray choices = root.getAsJsonArray("choices");
 
-        //防异常返回
+        // 当返回结构缺失 choices 字段或为空数组时，按空字符串降级，避免抛出解析异常。
         if (choices == null || choices.isEmpty()) {
             return "";
         }
