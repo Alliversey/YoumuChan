@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
 
+// 以虚拟玩家身份分发 AI 回复，并复用 Velocity 的聊天事件链与命令处理链。
 public class MessageSender {
     private final ProxyServer proxyServer;
     private final Logger logger;
@@ -19,7 +20,7 @@ public class MessageSender {
         this.fictionalPlayer = fictionalPlayer;
     }
 
-    // 以虚构玩家身份发送消息
+    // 发送入口：先标准化文本，再触发 PlayerChatEvent 交由其他插件拦截/改写。
     public void send(String message) {
         if (message == null) {
             return;
@@ -39,6 +40,10 @@ public class MessageSender {
                 });
     }
 
+    // 按事件结果执行最终分发：
+    // 1) 被拒绝则终止；
+    // 2) '/' 开头按命令执行；
+    // 3) 其余按普通聊天广播。
     private CompletableFuture<Void> dispatchByResult(PlayerChatEvent event) {
         PlayerChatEvent.ChatResult result = event.getResult();
 
@@ -57,11 +62,13 @@ public class MessageSender {
                 return CompletableFuture.completedFuture(null);
             }
 
+            // 以虚拟玩家身份执行命令，保持权限与事件上下文一致。
             return proxyServer.getCommandManager()
                     .executeAsync(fictionalPlayer, commandLine)
                     .thenApply(ignored -> null);
         }
 
+        // 普通聊天消息同时投递给在线玩家与控制台。
         Component component = Component.text("<" + fictionalPlayer.getUsername() + "> " + output);
         for (Player player : proxyServer.getAllPlayers()) {
             player.sendMessage(component);

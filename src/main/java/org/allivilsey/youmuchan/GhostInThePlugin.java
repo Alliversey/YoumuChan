@@ -5,6 +5,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+// AI 调度器：按热度驱动周期执行，串行触发“构建上下文 -> 推理 -> 发送”流程。
 public class GhostInThePlugin {
     private final ProxyServer server;
     private final Object plugin;
@@ -49,6 +50,7 @@ public class GhostInThePlugin {
     }
 
     private void scheduleNextTick() {
+        // 固定 1s 心跳，仅用于轮询是否到达下一次推理时间。
         server.getScheduler().buildTask(plugin, this::tick).delay(1, TimeUnit.SECONDS).schedule();
     }
 
@@ -73,6 +75,7 @@ public class GhostInThePlugin {
 
             nextPulseTime = now + computeInterval();
 
+            // 将推理放到独立任务中，避免阻塞轮询心跳。
             triggerAICycle(state);
         }
 
@@ -80,6 +83,7 @@ public class GhostInThePlugin {
     }
 
     private long computeInterval() {
+        // 热度越高，倍率越大，触发间隔随之调整。
         double heat = heatController.getHeat();
         return (long) (baseInterval * heat);
     }
@@ -93,8 +97,10 @@ public class GhostInThePlugin {
                 String reply = passageway.pass(target, state);
                 messageSender.send(reply);
             } catch (Exception e) {
+                // 当前实现仅记录堆栈，保持调度循环可继续运行。
                 e.printStackTrace();
             } finally {
+                // 无论成功失败都释放忙碌标记，避免后续周期永久阻塞。
                 aiBusy.set(false);
             }
         }).schedule();

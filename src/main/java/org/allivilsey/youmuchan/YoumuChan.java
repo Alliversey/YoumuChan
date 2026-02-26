@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+// 插件入口：加载配置并装配采集、决策、推理与消息发送组件。
 @Plugin(
         id = "youmuchan",
         name = "YoumuChan",
@@ -37,6 +38,7 @@ public class YoumuChan {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
+        // 确保插件数据目录可用，用于读取/落盘配置。
         try {
             Files.createDirectories(dataDirectory);
         } catch (IOException e) {
@@ -46,6 +48,7 @@ public class YoumuChan {
 
         ConfigurationNode config = loadConfig();
 
+        // 读取运行参数；缺省值用于首次启动或配置缺失场景。
         String apiKey = config.node("api_key").getString("your-api-key");
         String borderModel = config.node("border_model").getString("qwen-plus");
         float borderTemperature = (float) config.node("border_temperature").getDouble(0.0D);
@@ -60,16 +63,20 @@ public class YoumuChan {
 
         logger.info("YoumuChan 正在启动");
 
+        // 采集层：记录游戏内事件并按时间窗口提供检索。
         InGameInfoCollector collector = new InGameInfoCollector(
                 cacheDurationMs,
                 cacheMaxSize
         );
 
+        // 热度层：根据玩家行为动态调整 AI 调度节奏。
         HeatController heatController = new HeatController(halfLifeSeconds);
 
+        // 注册事件监听器：信息采集与热度更新。
         proxyServer.getEventManager().register(this, new InGameInfoListener(collector));
         proxyServer.getEventManager().register(this, new HeatControllerListener(heatController));
 
+        // 上下文构建层：从采集信息生成模型输入上下文。
         AIContextBuilder contextBuilder = new AIContextBuilder(
                 collector,
                 heatController,
@@ -80,6 +87,7 @@ public class YoumuChan {
 
         ApiProcessor apiProcessor = new ApiProcessor(apiKey);
 
+        // 推理通道：边界分析模型 + 主对话模型串联调用。
         KaianPassageway passageway = new KaianPassageway(
                 contextBuilder,
                 new AIBorderPromptFormatter(),
@@ -94,10 +102,12 @@ public class YoumuChan {
         MentalStateController mentalStateController = new MentalStateController(proxyServer);
         FocusController focusController = new FocusController();
 
+        // 构造虚拟玩家并复用服务端聊天/命令分发链路。
         YoumuVirtualize youmuVirtualize = new YoumuVirtualize();
         Player fictionalPlayer = youmuVirtualize.create(fictionalPlayerName);
         MessageSender messageSender = new MessageSender(proxyServer, logger, fictionalPlayer);
 
+        // 启动总调度器。
         ghostInThePlugin = new GhostInThePlugin(
                 proxyServer,
                 this,
@@ -114,6 +124,7 @@ public class YoumuChan {
         logger.info("YoumuChan 已启动");
     }
 
+    // 加载配置文件；不存在时先写入默认模板。
     private ConfigurationNode loadConfig() {
         Path configFile = dataDirectory.resolve("config.yml");
 
@@ -134,6 +145,7 @@ public class YoumuChan {
         return loader.createNode();
     }
 
+    // 将类路径下的默认 config.yml 复制到插件数据目录。
     private void saveDefaultFile(Path file) {
         try (var in = getClass().getResourceAsStream("/config.yml")) {
             if (in == null) {
