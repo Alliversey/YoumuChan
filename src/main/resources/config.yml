@@ -13,3 +13,5 @@ base_interval_ms: 15000
 
 cache_duration_ms: 300000
 cache_max_size: 100
+
+half_life_seconds: 30
