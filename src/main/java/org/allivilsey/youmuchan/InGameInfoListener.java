@@ -7,9 +7,13 @@ import com.velocitypowered.api.event.player.PlayerChatEvent;
 
 public class InGameInfoListener {
     private final InGameInfoCollector inGameInfoCollector;
+    private final HeatController heatController;
 
-    public InGameInfoListener(InGameInfoCollector inGameInfoCollector) {
+    public InGameInfoListener(
+            InGameInfoCollector inGameInfoCollector,
+            HeatController heatController) {
         this.inGameInfoCollector = inGameInfoCollector;
+        this.heatController = heatController;
     }
 
     //监听聊天事件

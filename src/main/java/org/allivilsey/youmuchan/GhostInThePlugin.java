@@ -12,12 +12,10 @@ public class GhostInThePlugin {
     private final KaianPassageway passageway;
     private final MentalStateController mentalStateController;
     private final FocusController focusController;
-
+    private final HeatController heatController;
     private final MessageSender messageSender;
 
     private final long baseInterval;
-
-    private volatile double heatCoefficient = 1.0;
 
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final AtomicBoolean aiBusy = new AtomicBoolean(false);
@@ -30,6 +28,7 @@ public class GhostInThePlugin {
             KaianPassageway passageway,
             MentalStateController mentalStateController,
             FocusController focusController,
+            HeatController heatController,
             MessageSender messageSender,
             long baseInterval) {
         this.server = server;
@@ -37,6 +36,7 @@ public class GhostInThePlugin {
         this.passageway = passageway;
         this.mentalStateController = mentalStateController;
         this.focusController = focusController;
+        this.heatController = heatController;
         this.messageSender = messageSender;
         this.baseInterval = baseInterval;
     }
@@ -79,7 +79,8 @@ public class GhostInThePlugin {
     }
 
     private long computeInterval() {
-        return (long) (baseInterval * heatCoefficient);
+        double heat = heatController.getHeat();
+        return (long) (baseInterval * heat);
     }
 
     private void triggerAICycle(MentalState state) {
@@ -96,9 +97,5 @@ public class GhostInThePlugin {
                 aiBusy.set(false);
             }
         }).schedule();
-    }
-
-    public void setHeatCoefficient(double k) {
-        this.heatCoefficient = k;
     }
 }

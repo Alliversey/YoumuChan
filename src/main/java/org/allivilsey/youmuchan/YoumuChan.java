@@ -55,6 +55,7 @@ public class YoumuChan {
         long baseIntervalMs = config.node("base_interval_ms").getLong(15000L);
         long cacheDurationMs = config.node("cache_duration_ms").getLong(300000L);
         int cacheMaxSize = config.node("cache_max_size").getInt(100);
+        double halfLifeSeconds = config.node("half_life_seconds").getDouble(30.0);
 
         logger.info("YoumuChan 正在启动");
 
@@ -63,7 +64,9 @@ public class YoumuChan {
                 cacheMaxSize
         );
 
-        proxyServer.getEventManager().register(this, new InGameInfoListener(collector));
+        HeatController heatController = new HeatController(halfLifeSeconds);
+
+        proxyServer.getEventManager().register(this, new InGameInfoListener(collector, heatController));
 
         AIContextBuilder contextBuilder = new AIContextBuilder(
                 collector,
@@ -95,6 +98,7 @@ public class YoumuChan {
                 passageway,
                 mentalStateController,
                 focusController,
+                heatController,
                 messageSender,
                 baseIntervalMs
         );
