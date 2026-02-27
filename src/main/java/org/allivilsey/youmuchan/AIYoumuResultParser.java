@@ -8,7 +8,7 @@ import java.util.Locale;
 
 public class AIYoumuResultParser {
 
-    // 迁移自 ApiProcessor.parseReply：从 API 响应中提取第一个 choice 的 message.content。
+    //解析妖梦回复
     public static String parseReplay(String json) {
         JsonObject root = JsonParser.parseString(json).getAsJsonObject();
         JsonArray choices = root.getAsJsonArray("choices");
@@ -25,10 +25,7 @@ public class AIYoumuResultParser {
         return message.get("content").getAsString();
     }
 
-    // 解析主模型返回的结构化消息：
-    // 1) 若入参是完整 API 响应，先提取 message.content；
-    // 2) 若 content 是 JSON（含 action/content），按 action 转成可发送文本；
-    // 3) 若 content 不是 JSON，按纯文本直接返回。
+    //
     public static String applyResult(String jsonOrContent) {
         if (jsonOrContent == null) {
             return "";
