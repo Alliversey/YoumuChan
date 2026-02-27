@@ -9,12 +9,11 @@ import java.util.concurrent.TimeUnit;
 public class ApiProcessor{
 
     //声明JSON类型
-    private static final MediaType JSON
-            = MediaType.get("application/json; charset=utf-8");
+    private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
 
     //OkHttp客户端
     private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS)
+            .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .build();
 
