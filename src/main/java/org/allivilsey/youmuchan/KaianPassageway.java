@@ -54,6 +54,7 @@ public class KaianPassageway {
         context.setModel(mainModel);
         context.setTemperature(mainTemperature);
         youmuFormatter.format(context);
-        return apiProcessor.sendToApi(context);
+        String youmuReply = apiProcessor.sendToApi(context);
+        return AIYoumuResultParser.applyResult(youmuReply);
     }
 }

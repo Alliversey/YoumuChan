@@ -65,7 +65,6 @@ public class ApiProcessor {
         //关闭CoT
         root.addProperty("enable_thinking", false);
 
-
         //设置对话温度
         if (context.getTemperature() != null) {
             root.addProperty("temperature", context.getTemperature());
@@ -86,7 +85,7 @@ public class ApiProcessor {
                 .post(body)
                 .build();
 
-        //发送并接收相应
+        //发送并接收响应
         try (Response response = CLIENT.newCall(request).execute()) {
             ResponseBody rawBody = response.body();
             String responseBody = rawBody == null ? "" : rawBody.string();
@@ -107,27 +106,7 @@ public class ApiProcessor {
                 throw new IOException("API错误：" + response.code() + " / " + responseBody);
             }
 
-            return parseReply(responseBody);
+            return AIYoumuResultParser.parseReolay(responseBody);
         }
-    }
-
-    //提取返回内容
-    private String parseReply(String json) {
-        JsonObject root = JsonParser.parseString(json).getAsJsonObject();
-        JsonArray choices = root.getAsJsonArray("choices");
-
-        // 当返回结构缺失 choices 字段或为空数组时，按空字符串降级，避免抛出解析异常。
-        if (choices == null || choices.isEmpty()) {
-            return "";
-        }
-
-        //读取第一个choice的message
-        JsonObject message = choices
-                .get(0)
-                .getAsJsonObject()
-                .getAsJsonObject("message");
-
-        //返回AI回复文本
-        return message.get("content").getAsString();
     }
 }
