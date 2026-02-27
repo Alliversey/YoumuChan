@@ -1,8 +1,6 @@
 package org.allivilsey.youmuchan;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -74,7 +72,9 @@ public class ApiProcessor {
         }
 
         if (debugMode) {
-            logger.info("[debug_mode][send] {}", root);
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String prettyJson = gson.toJson(JsonParser.parseString(root.toString()));
+            logger.info("[debug_mode][send]\n{}", prettyJson);
         }
 
         //将JSON字符串包装为请求
@@ -92,7 +92,15 @@ public class ApiProcessor {
             String responseBody = rawBody == null ? "" : rawBody.string();
 
             if (debugMode) {
-                logger.info("[debug_mode][recv] {}", responseBody);
+                try {
+                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                    JsonElement je = JsonParser.parseString(responseBody);
+                    String prettyResp = gson.toJson(je);
+                    logger.info("[debug_mode][recv]\n{}", prettyResp);
+                } catch (Exception e) {
+                    // 如果不是合法 JSON，就直接打印原始字符串
+                    logger.info("[debug_mode][recv] {}", responseBody);
+                }
             }
 
             if (!response.isSuccessful()) {

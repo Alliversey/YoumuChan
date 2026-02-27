@@ -85,7 +85,12 @@ public class GhostInThePlugin {
     private long computeInterval() {
         // 热度越高，倍率越大，触发间隔随之调整。
         double heat = heatController.getHeat();
-        return (long) (baseInterval / heat);
+
+        if (heat != 0.0) {
+            return (long) (baseInterval / heat);
+        }
+
+        return baseInterval;
     }
 
     private void triggerAICycle(MentalState state) {
