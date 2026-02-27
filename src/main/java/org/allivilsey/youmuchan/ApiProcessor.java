@@ -106,7 +106,7 @@ public class ApiProcessor {
                 throw new IOException("API错误：" + response.code() + " / " + responseBody);
             }
 
-            return AIYoumuResultParser.parseReolay(responseBody);
+            return AIYoumuResultParser.parseReplay(responseBody);
         }
     }
 }

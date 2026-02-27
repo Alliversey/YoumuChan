@@ -9,7 +9,7 @@ import java.util.Locale;
 public class AIYoumuResultParser {
 
     // 迁移自 ApiProcessor.parseReply：从 API 响应中提取第一个 choice 的 message.content。
-    public static String parseReolay(String json) {
+    public static String parseReplay(String json) {
         JsonObject root = JsonParser.parseString(json).getAsJsonObject();
         JsonArray choices = root.getAsJsonArray("choices");
 
@@ -42,7 +42,7 @@ public class AIYoumuResultParser {
         try {
             JsonObject root = JsonParser.parseString(payload).getAsJsonObject();
             if (root.has("choices")) {
-                payload = parseReolay(payload).strip();
+                payload = parseReplay(payload).strip();
             }
         } catch (Exception ignored) {
             return payload;
