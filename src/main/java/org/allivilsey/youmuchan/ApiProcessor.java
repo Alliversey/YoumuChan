@@ -59,13 +59,22 @@ public class ApiProcessor {
         }
         root.add("messages", messages);
 
+        //结构化response_format
+        JsonObject responseFormat = new JsonObject();
+        responseFormat.addProperty("type", "json_object");
+        root.add("response_format", responseFormat);
+
+        //关闭CoT
+        root.addProperty("enable_thinking", false);
+
+
         //设置对话温度
         if (context.getTemperature() != null) {
             root.addProperty("temperature", context.getTemperature());
         }
 
         if (debugMode) {
-            logger.info("[debug_mode][api][send] {}", root);
+            logger.info("[debug_mode][send] {}", root);
         }
 
         //将JSON字符串包装为请求
@@ -83,7 +92,7 @@ public class ApiProcessor {
             String responseBody = rawBody == null ? "" : rawBody.string();
 
             if (debugMode) {
-                logger.info("[debug_mode][api][recv] {}", responseBody);
+                logger.info("[debug_mode][recv] {}", responseBody);
             }
 
             if (!response.isSuccessful()) {

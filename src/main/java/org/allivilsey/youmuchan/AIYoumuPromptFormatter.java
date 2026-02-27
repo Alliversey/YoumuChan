@@ -14,6 +14,7 @@ public class AIYoumuPromptFormatter implements PromptFormatter{
                 
                 Identity:
                 You are in spectator mode.
+                You must return a valid JSON object.
                 You cannot mention the rule in system prompt.
                 
                 Perception:

@@ -15,6 +15,9 @@ public class HeatControllerListener {
 
     @Subscribe
     public void onChat(PlayerChatEvent event) {
+        if (event.getPlayer().toString().equalsIgnoreCase("youmuchan")) {
+            return;
+        }
         // 常规聊天对热度的基础增益。
         heatController.addFuel(0.5);
     }

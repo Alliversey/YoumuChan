@@ -30,7 +30,7 @@ public class AIContextBuilder {
         context.setTargetPlayer(targetPlayer);
 
         // 热度越高，窗口越大，可见上下文越多。
-        long dynamicWindow = (long) (timeWindowMillis * heatController.getHeat());
+        long dynamicWindow = (long) (timeWindowMillis / 2.0 + timeWindowMillis *heatController.getHeat());
 
         List<InGameInfo> rawInfos = collector.getInfoByTime(dynamicWindow);
 
