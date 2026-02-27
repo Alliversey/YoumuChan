@@ -1,37 +1,43 @@
 package org.allivilsey.youmuchan;
 
-import com.google.gson.*;
-import okhttp3.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class ApiProcessor{
+public class ApiProcessor {
 
-    //声明JSON类型
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
-
-    //OkHttp客户端
     private static final OkHttpClient CLIENT = new OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .build();
 
     //接口地址
-    private static final String apiUrl = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
+    private static final String API_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
 
-    //从配置文件导入APIKEY和模型名称
     private final String apiKey;
-    public ApiProcessor(String apiKey) {
-            this.apiKey = apiKey;
+    private final boolean debugMode;
+    private final Logger logger;
+
+    public ApiProcessor(String apiKey, boolean debugMode, Logger logger) {
+        this.apiKey = apiKey;
+        this.debugMode = debugMode;
+        this.logger = logger;
     }
 
     //发送用户消息，返回AI回复文本
     public String sendToApi(AIContext context) throws IOException {
-
         JsonObject root = new JsonObject();
-
-        //指定模型
         root.addProperty("model", context.getModel());
 
         JsonArray messages = new JsonArray();
@@ -51,21 +57,21 @@ public class ApiProcessor{
             user.addProperty("content", context.getUserPrompt());
             messages.add(user);
         }
-
         root.add("messages", messages);
 
         //设置对话温度
         if (context.getTemperature() != null) {
-            root.addProperty("temperature",context.getTemperature());
+            root.addProperty("temperature", context.getTemperature());
         }
 
+        if (debugMode) {
+            logger.info("[debug_mode][api][send] {}", root);
+        }
 
         //将JSON字符串包装为请求
         RequestBody body = RequestBody.create(root.toString(), JSON);
-
-        //构造HTTP POST请求
         Request request = new Request.Builder()
-                .url(apiUrl)
+                .url(API_URL)
                 .header("Authorization", "Bearer " + apiKey)
                 .header("Content-Type", "application/json")
                 .post(body)
@@ -73,29 +79,24 @@ public class ApiProcessor{
 
         //发送并接收相应
         try (Response response = CLIENT.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                throw new IOException(
-                        "API错误："
-                                + response.code()
-                                + " / "
-                                + response.body().string()
-                );
+            ResponseBody rawBody = response.body();
+            String responseBody = rawBody == null ? "" : rawBody.string();
+
+            if (debugMode) {
+                logger.info("[debug_mode][api][recv] {}", responseBody);
             }
 
-            String responseBody = response.body().string();
+            if (!response.isSuccessful()) {
+                throw new IOException("API错误：" + response.code() + " / " + responseBody);
+            }
 
-            //解析并返回文本
             return parseReply(responseBody);
         }
     }
 
     //提取返回内容
     private String parseReply(String json) {
-
-        JsonObject root = JsonParser
-                .parseString(json)
-                .getAsJsonObject();
-
+        JsonObject root = JsonParser.parseString(json).getAsJsonObject();
         JsonArray choices = root.getAsJsonArray("choices");
 
         // 当返回结构缺失 choices 字段或为空数组时，按空字符串降级，避免抛出解析异常。

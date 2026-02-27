@@ -1,6 +1,7 @@
 ﻿# YoumuChan 默认配置
 
 api_key: your-api-key
+debug_mode: false
 
 border_model: qwen3.5-flash
 border_temperature: 0.0
