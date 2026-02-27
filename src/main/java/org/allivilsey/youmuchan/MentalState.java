@@ -4,5 +4,4 @@ package org.allivilsey.youmuchan;
 public enum MentalState {
     SLEEP,
     DREAM,
-    DEBUG
 }
