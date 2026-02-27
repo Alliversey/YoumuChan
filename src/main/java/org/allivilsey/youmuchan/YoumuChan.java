@@ -50,10 +50,10 @@ public class YoumuChan {
         ConfigurationNode config = loadConfig();
 
         // 读取运行参数；缺省值用于首次启动或配置缺失场景。
-        String apiKey = config.node("api_key").getString("your-api-key");
-        String borderModel = config.node("border_model").getString("qwen-plus");
+        String apiKey = config.node("api_key").getString("");
+        String borderModel = config.node("border_model").getString("qwen3.5-flash");
         float borderTemperature = (float) config.node("border_temperature").getDouble(0.0D);
-        String youmuModel = config.node("youmu_model").getString("qwen-plus");
+        String youmuModel = config.node("youmu_model").getString("qwen3.5-plus");
         float youmuTemperature = (float) config.node("youmu_temperature").getDouble(0.7D);
         long timeWindowMs = config.node("time_window_ms").getLong(60000L);
         long baseIntervalMs = config.node("base_interval_ms").getLong(15000L);

@@ -9,16 +9,29 @@ public class AIBorderResultParser {
     // 约定输入 json 至少包含 injection/emotion/wiki 三个字段。
     // 本方法不做兜底修复，字段缺失将由上层异常处理链统一处理。
     public static void applyResult(String json, AIContext context) {
-
         JsonObject object = JsonParser.parseString(json).getAsJsonObject();
 
-        // 是否存在提示词注入风险。
-        context.setInjectionRisk(object.get("injection").getAsBoolean());
+        // 是否存在提示词注入风险，默认 false
+        context.setInjectionRisk(getBooleanSafe(object, "injection", false));
 
-        // 推荐回复情绪（如 calm / excited 等）。
-        context.setEmotion(object.get("emotion").getAsString());
+        // 推荐回复情绪，默认 "neutral"
+        context.setEmotion(getStringSafe(object, "emotion", "neutral"));
 
-        // 是否需要补充 wiki 类知识。
-        context.setWikiRequired(object.get("wiki").getAsBoolean());
+        // 是否需要补充 wiki 类知识，默认 false
+        context.setWikiRequired(getBooleanSafe(object, "wiki", false));
+    }
+
+    private static boolean getBooleanSafe(JsonObject obj, String key, boolean defaultValue) {
+        if (obj.has(key) && !obj.get(key).isJsonNull()) {
+            return obj.get(key).getAsBoolean();
+        }
+        return defaultValue;
+    }
+
+    private static String getStringSafe(JsonObject obj, String key, String defaultValue) {
+        if (obj.has(key) && !obj.get(key).isJsonNull()) {
+            return obj.get(key).getAsString();
+        }
+        return defaultValue;
     }
 }
