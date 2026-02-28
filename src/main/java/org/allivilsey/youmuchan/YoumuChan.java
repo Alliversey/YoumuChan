@@ -5,7 +5,6 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -61,7 +60,7 @@ public class YoumuChan {
         long cacheDurationMs = config.node("cache_duration_ms").getLong(300000L);
         int cacheMaxSize = config.node("cache_max_size").getInt(100);
         double halfLifeSeconds = config.node("half_life_seconds").getDouble(30.0);
-        String fictionalPlayerName = config.node("fictional_player_name").getString("YoumuChan");
+        String broadcasterName = config.node("fictional_player_name").getString("YoumuChan");
 
         logger.info("YoumuChan 正在启动");
 
@@ -104,10 +103,8 @@ public class YoumuChan {
         MentalStateController mentalStateController = new MentalStateController(proxyServer);
         FocusController focusController = new FocusController();
 
-        // 构造虚拟玩家并复用服务端聊天/命令分发链路。
-        YoumuVirtualize youmuVirtualize = new YoumuVirtualize();
-        Player fictionalPlayer = youmuVirtualize.create(fictionalPlayerName);
-        MessageSender messageSender = new MessageSender(proxyServer, logger, fictionalPlayer);
+        // 直接广播消息到各个子服，并使用配置名称作为消息前缀。
+        MessageSender messageSender = new MessageSender(proxyServer, logger, broadcasterName);
 
         // 启动总调度器。
         ghostInThePlugin = new GhostInThePlugin(
