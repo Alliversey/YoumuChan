@@ -104,7 +104,7 @@ public class YoumuChan {
         FocusController focusController = new FocusController();
 
         // 直接广播消息到各个子服，并使用配置名称作为消息前缀。
-        MessageSender messageSender = new MessageSender(proxyServer, logger, broadcasterName);
+        MessageSender messageSender = new MessageSender(proxyServer, broadcasterName, collector);
 
         // 启动总调度器。
         ghostInThePlugin = new GhostInThePlugin(

@@ -6,18 +6,19 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 
-// Broadcast AI replies to players connected to each backend server.
+
 public class MessageSender {
     private final ProxyServer proxyServer;
-    private final Logger logger;
     private final String senderName;
+    private final InGameInfoCollector collector;
 
-    public MessageSender(ProxyServer proxyServer, Logger logger, String senderName) {
+    public MessageSender(ProxyServer proxyServer, String senderName, InGameInfoCollector collector) {
         this.proxyServer = proxyServer;
-        this.logger = logger;
         this.senderName = senderName;
+        this.collector = collector;
     }
 
+    //向全子服广播
     public void send(String message) {
         if (message == null) {
             return;
@@ -36,6 +37,8 @@ public class MessageSender {
         }
 
         proxyServer.getConsoleCommandSource().sendMessage(component);
-        logger.debug("Broadcasted AI message to {} backend server(s)", proxyServer.getAllServers().size());
+
+        InGameInfo info = new InGameInfo(InfoType.CHAT, senderName, null, message);
+        collector.addInfo(info);
     }
 }
