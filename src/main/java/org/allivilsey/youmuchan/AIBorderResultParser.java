@@ -14,8 +14,8 @@ public class AIBorderResultParser {
         // 是否存在提示词注入风险，默认 false
         context.setInjectionRisk(getBooleanSafe(object, "injection", false));
 
-        // 推荐回复情绪：字段缺失或类型不正确时直接抛异常
-        context.setEmotion(object.get("emotion").getAsString());
+        // 推荐回复情绪，默认 "neutral"
+        context.setEmotion(getStringSafe(object, "emotion", "neutral"));
 
         // 是否需要补充 wiki 类知识，默认 false
         context.setWikiRequired(getBooleanSafe(object, "wiki", false));
@@ -28,4 +28,10 @@ public class AIBorderResultParser {
         return defaultValue;
     }
 
+    private static String getStringSafe(JsonObject obj, String key, String defaultValue) {
+        if (obj.has(key) && !obj.get(key).isJsonNull()) {
+            return obj.get(key).getAsString();
+        }
+        return defaultValue;
+    }
 }

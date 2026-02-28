@@ -36,26 +36,41 @@ public class AIYoumuResultParser {
             return "";
         }
 
-        JsonObject root = JsonParser.parseString(payload).getAsJsonObject();
-        if (root.has("choices")) {
-            payload = parseReplay(payload).strip();
+        try {
+            JsonObject root = JsonParser.parseString(payload).getAsJsonObject();
+            if (root.has("choices")) {
+                payload = parseReplay(payload).strip();
+            }
+        } catch (Exception ignored) {
+            return payload;
         }
 
         if (payload.isEmpty()) {
             return "";
         }
 
-        JsonObject result = JsonParser.parseString(payload).getAsJsonObject();
-        String action = result.get("action").getAsString().toLowerCase(Locale.ROOT);
-        String content = result.get("content").getAsString().strip();
+        try {
+            JsonObject result = JsonParser.parseString(payload).getAsJsonObject();
+            String action = getStringSafe(result, "action", "chat").toLowerCase(Locale.ROOT);
+            String content = getStringSafe(result, "content", "").strip();
 
-        if (content.isEmpty()) {
-            return "";
-        }
+            if (content.isEmpty()) {
+                return "";
+            }
 
-        if ("command".equals(action)) {
-            return content.startsWith("/") ? content : "/" + content;
+            if ("command".equals(action)) {
+                return content.startsWith("/") ? content : "/" + content;
+            }
+            return content;
+        } catch (Exception ignored) {
+            return payload;
         }
-        return content;
+    }
+
+    private static String getStringSafe(JsonObject obj, String key, String defaultValue) {
+        if (obj.has(key) && !obj.get(key).isJsonNull()) {
+            return obj.get(key).getAsString();
+        }
+        return defaultValue;
     }
 }
