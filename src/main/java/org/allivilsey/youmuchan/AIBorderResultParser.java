@@ -12,26 +12,19 @@ public class AIBorderResultParser {
         JsonObject object = JsonParser.parseString(json).getAsJsonObject();
 
         // 是否存在提示词注入风险，默认 false
-        context.setInjectionRisk(getBooleanSafe(object, "injection", false));
+        context.setInjectionRisk(getBooleanSafe(object, "injection"));
 
-        // 推荐回复情绪，默认 "neutral"
-        context.setEmotion(getStringSafe(object, "emotion", "neutral"));
+        // 推荐回复情绪：字段缺失或类型不正确时直接抛异常
+        context.setEmotion(object.get("emotion").getAsString());
 
         // 是否需要补充 wiki 类知识，默认 false
-        context.setWikiRequired(getBooleanSafe(object, "wiki", false));
+        context.setWikiRequired(getBooleanSafe(object, "wiki"));
     }
 
-    private static boolean getBooleanSafe(JsonObject obj, String key, boolean defaultValue) {
+    private static boolean getBooleanSafe(JsonObject obj, String key) {
         if (obj.has(key) && !obj.get(key).isJsonNull()) {
             return obj.get(key).getAsBoolean();
         }
-        return defaultValue;
-    }
-
-    private static String getStringSafe(JsonObject obj, String key, String defaultValue) {
-        if (obj.has(key) && !obj.get(key).isJsonNull()) {
-            return obj.get(key).getAsString();
-        }
-        return defaultValue;
+        return false;
     }
 }
