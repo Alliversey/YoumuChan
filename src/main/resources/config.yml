@@ -10,7 +10,7 @@ youmu_model: qwen3.5-plus
 youmu_temperature: 0.7
 
 time_window_ms: 600000
-base_interval_ms: 15000
+base_interval_ms: 20000
 
 cache_duration_ms: 600000
 cache_max_size: 100

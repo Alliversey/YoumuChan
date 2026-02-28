@@ -44,6 +44,6 @@ public class HeatController {
 
     // 将燃料映射到 (0, 2] 区间，1.0 附近作为常规工作区间。
     private double mapHeat() {
-        return 2.0 / (1.0 + Math.exp(-0.5 * (fuel - 6.0)));
+        return Math.pow(2.0 / (1.0 + Math.exp(-0.5 * (fuel - 6.0))), 1.2);
     }
 }
