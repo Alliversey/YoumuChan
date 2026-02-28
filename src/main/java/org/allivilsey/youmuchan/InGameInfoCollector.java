@@ -27,6 +27,7 @@ public class InGameInfoCollector {
         }
         infoBuffer.addLast(info);
         clearOldInfo();
+        enforceSizeLimit();
     }
 
     //清除过期数据
