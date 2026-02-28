@@ -32,9 +32,7 @@ public class MessageSender {
         }
 
         PlayerChatEvent event = new PlayerChatEvent(fictionalPlayer, normalized);
-        proxyServer.getEventManager().fire(event)
-                .thenCompose(this::dispatchByResult)
-                .exceptionally(throwable -> {
+        proxyServer.getEventManager().fire(event).thenCompose(this::dispatchByResult).exceptionally(throwable -> {
                     logger.error("虚构玩家发送消息失败", throwable);
                     return null;
                 });
