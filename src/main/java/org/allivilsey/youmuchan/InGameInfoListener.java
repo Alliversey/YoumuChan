@@ -36,7 +36,7 @@ public class InGameInfoListener {
                 InfoType.PLAYER_EVENT,
                 playerName,
                 null,
-                "加入服务器"
+                "登入服务器"
         );
 
         inGameInfoCollector.addInfo(info);
