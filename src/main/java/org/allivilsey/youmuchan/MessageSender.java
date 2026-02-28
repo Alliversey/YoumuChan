@@ -36,9 +36,9 @@ public class MessageSender {
             }
         }
 
-        proxyServer.getConsoleCommandSource().sendMessage(component);
-
         InGameInfo info = new InGameInfo(InfoType.CHAT, senderName, null, message);
         collector.addInfo(info);
+
+        proxyServer.getConsoleCommandSource().sendMessage(component);
     }
 }

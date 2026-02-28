@@ -87,12 +87,12 @@ public class YoumuChan {
         );
 
         ApiProcessor apiProcessor = new ApiProcessor(apiKey, debugMode, logger);
-
+        FocusController focusController = new FocusController();
         // 推理通道：边界分析模型 + 主对话模型串联调用。
         KaianPassageway passageway = new KaianPassageway(
                 contextBuilder,
                 new AIBorderPromptFormatter(),
-                new AIYoumuPromptFormatter(),
+                new AIYoumuPromptFormatter(focusController),
                 apiProcessor,
                 borderModel,
                 borderTemperature,
@@ -101,7 +101,6 @@ public class YoumuChan {
         );
 
         MentalStateController mentalStateController = new MentalStateController(proxyServer);
-        FocusController focusController = new FocusController();
 
         // 直接广播消息到各个子服，并使用配置名称作为消息前缀。
         MessageSender messageSender = new MessageSender(proxyServer, broadcasterName, collector);

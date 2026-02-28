@@ -37,7 +37,7 @@ public class AIBorderPromptFormatter implements PromptFormatter {
                 """;
 
         JsonObject request = new JsonObject();
-        request.addProperty("target_player", context.getTargetPlayer());
+
 
         JsonArray chatLogs = new JsonArray();
         context.getFilteredInfos().forEach(info -> {
