@@ -36,41 +36,26 @@ public class AIYoumuResultParser {
             return "";
         }
 
-        try {
-            JsonObject root = JsonParser.parseString(payload).getAsJsonObject();
-            if (root.has("choices")) {
-                payload = parseReplay(payload).strip();
-            }
-        } catch (Exception ignored) {
-            return payload;
+        JsonObject root = JsonParser.parseString(payload).getAsJsonObject();
+        if (root.has("choices")) {
+            payload = parseReplay(payload).strip();
         }
 
         if (payload.isEmpty()) {
             return "";
         }
 
-        try {
-            JsonObject result = JsonParser.parseString(payload).getAsJsonObject();
-            String action = getStringSafe(result, "action", "chat").toLowerCase(Locale.ROOT);
-            String content = getStringSafe(result, "content", "").strip();
+        JsonObject result = JsonParser.parseString(payload).getAsJsonObject();
+        String action = result.get("action").getAsString().toLowerCase(Locale.ROOT);
+        String content = result.get("content").getAsString().strip();
 
-            if (content.isEmpty()) {
-                return "";
-            }
-
-            if ("command".equals(action)) {
-                return content.startsWith("/") ? content : "/" + content;
-            }
-            return content;
-        } catch (Exception ignored) {
-            return payload;
+        if (content.isEmpty()) {
+            return "";
         }
-    }
 
-    private static String getStringSafe(JsonObject obj, String key, String defaultValue) {
-        if (obj.has(key) && !obj.get(key).isJsonNull()) {
-            return obj.get(key).getAsString();
+        if ("command".equals(action)) {
+            return content.startsWith("/") ? content : "/" + content;
         }
-        return defaultValue;
+        return content;
     }
 }
