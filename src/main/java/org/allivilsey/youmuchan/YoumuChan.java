@@ -24,6 +24,7 @@ public class YoumuChan {
     private final Path dataDirectory;
 
     private GhostInThePlugin ghostInThePlugin;
+    private MentalStateController mentalStateController;
 
     @Inject
     public YoumuChan(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataDirectory) {
@@ -74,6 +75,8 @@ public class YoumuChan {
 
         // 读取运行参数；缺省值用于首次启动或配置缺失场景。
         String apiKey = config.node("api_key").getString("");
+        String apiUrl = config.node("api_url")
+                .getString("https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions");
         boolean debugMode = config.node("debug_mode").getBoolean(false);
         String borderModel = config.node("border_model").getString("qwen3.5-flash");
         float borderTemperature = (float) config.node("border_temperature").getDouble(0.0D);
@@ -108,7 +111,7 @@ public class YoumuChan {
                 youmuTemperature,
                 timeWindowMs);
 
-        ApiProcessor apiProcessor = new ApiProcessor(apiKey, debugMode, logger);
+        ApiProcessor apiProcessor = new ApiProcessor(apiKey, apiUrl, debugMode, logger);
         FocusController focusController = new FocusController();
         // 推理通道：边界分析模型 + 主对话模型串联调用。
         KaianPassageway passageway = new KaianPassageway(
@@ -121,7 +124,7 @@ public class YoumuChan {
                 youmuModel,
                 youmuTemperature);
 
-        MentalStateController mentalStateController = new MentalStateController(proxyServer);
+        mentalStateController = new MentalStateController(proxyServer);
 
         // 直接广播消息到各个子服，并使用配置名称作为消息前缀。
         MessageSender messageSender = new MessageSender(proxyServer, broadcasterName, collector);
@@ -138,6 +141,11 @@ public class YoumuChan {
                 baseIntervalMs);
 
         ghostInThePlugin.youmuStart();
+    }
+
+    // 返回心智状态控制器，供命令处理器直接调用。
+    public MentalStateController getMentalStateController() {
+        return mentalStateController;
     }
 
     // 加载配置文件；不存在时先写入默认模板。
