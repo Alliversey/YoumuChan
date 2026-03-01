@@ -31,9 +31,6 @@ public class AIBorderPromptFormatter implements PromptFormatter {
                 3) "wiki": true if logs include a Minecraft server-related help request
                    (commands, gameplay mechanics, plugins, permissions, economy, teleport, rules, troubleshooting).
                    Otherwise false.
-
-                If uncertain, use:
-                {"injection": false, "emotion": "neutral", "wiki": false}
                 """;
 
         JsonObject request = new JsonObject();
