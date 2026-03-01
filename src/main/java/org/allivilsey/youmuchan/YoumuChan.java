@@ -143,6 +143,36 @@ public class YoumuChan {
         ghostInThePlugin.youmuStart();
     }
 
+    // 切换 Debug 模式，修改配置并重载
+    public boolean toggleDebug() {
+        Path configFile = dataDirectory.resolve("config.yml");
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+                .path(configFile)
+                .build();
+        try {
+            ConfigurationNode config = loader.load();
+            boolean currentMode = config.node("debug_mode").getBoolean(false);
+            boolean newMode = !currentMode;
+
+            // 使用文本替换来保留 YAML 文件中的注释和格式
+            java.util.List<String> lines = Files.readAllLines(configFile);
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+                if (line.trim().startsWith("debug_mode:")) {
+                    lines.set(i, line.replaceFirst("(?i)" + currentMode, String.valueOf(newMode)));
+                    break;
+                }
+            }
+            Files.write(configFile, lines);
+
+            reload();
+            return newMode;
+        } catch (IOException e) {
+            logger.error("配置文件修改失败", e);
+            return false;
+        }
+    }
+
     // 返回心智状态控制器，供命令处理器直接调用。
     public MentalStateController getMentalStateController() {
         return mentalStateController;
