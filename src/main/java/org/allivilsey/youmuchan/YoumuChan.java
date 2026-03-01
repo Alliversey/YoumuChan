@@ -1,6 +1,7 @@
 package org.allivilsey.youmuchan;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
@@ -15,12 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 // 插件入口：加载配置并装配采集、决策、推理与消息发送组件。
-@Plugin(
-        id = "youmuchan",
-        name = "YoumuChan",
-        version = "2.0",
-        authors = {"Allivilsey"}
-)
+@Plugin(id = "youmuchan", name = "YoumuChan", version = "2.0", authors = { "Allivilsey" })
 public class YoumuChan {
 
     private final ProxyServer proxyServer;
@@ -46,6 +42,34 @@ public class YoumuChan {
             return;
         }
 
+        startPlugin();
+
+        // 注册 /youmu 命令。
+        CommandMeta meta = proxyServer.getCommandManager()
+                .metaBuilder("youmu")
+                .build();
+        proxyServer.getCommandManager().register(meta, new YoumuCommand(this));
+
+        logger.info("YoumuChan 已启动");
+    }
+
+    // 重载插件：停止调度 -> 注销监听器 -> 重新读取配置并装配组件。
+    public void reload() {
+        logger.info("YoumuChan 正在重载");
+
+        if (ghostInThePlugin != null) {
+            ghostInThePlugin.youmuStop();
+        }
+
+        proxyServer.getEventManager().unregisterListeners(this);
+
+        startPlugin();
+
+        logger.info("YoumuChan 已重载");
+    }
+
+    // 读取配置并装配全部运行时组件。
+    private void startPlugin() {
         ConfigurationNode config = loadConfig();
 
         // 读取运行参数；缺省值用于首次启动或配置缺失场景。
@@ -67,8 +91,7 @@ public class YoumuChan {
         // 采集层：记录游戏内事件并按时间窗口提供检索。
         InGameInfoCollector collector = new InGameInfoCollector(
                 cacheDurationMs,
-                cacheMaxSize
-        );
+                cacheMaxSize);
 
         // 热度层：根据玩家行为动态调整 AI 调度节奏。
         HeatController heatController = new HeatController(halfLifeSeconds);
@@ -83,8 +106,7 @@ public class YoumuChan {
                 heatController,
                 youmuModel,
                 youmuTemperature,
-                timeWindowMs
-        );
+                timeWindowMs);
 
         ApiProcessor apiProcessor = new ApiProcessor(apiKey, debugMode, logger);
         FocusController focusController = new FocusController();
@@ -97,8 +119,7 @@ public class YoumuChan {
                 borderModel,
                 borderTemperature,
                 youmuModel,
-                youmuTemperature
-        );
+                youmuTemperature);
 
         MentalStateController mentalStateController = new MentalStateController(proxyServer);
 
@@ -114,12 +135,9 @@ public class YoumuChan {
                 focusController,
                 heatController,
                 messageSender,
-                baseIntervalMs
-        );
+                baseIntervalMs);
 
         ghostInThePlugin.youmuStart();
-
-        logger.info("YoumuChan 已启动");
     }
 
     // 加载配置文件；不存在时先写入默认模板。

@@ -44,9 +44,15 @@ public class GhostInThePlugin {
 
     // 启动 AI 调度循环；若已在运行则直接返回，避免重复注册任务链。
     public void youmuStart() {
-        if (!running.compareAndSet(false, true)) return;
+        if (!running.compareAndSet(false, true))
+            return;
         nextPulseTime = System.currentTimeMillis();
         scheduleNextTick();
+    }
+
+    // 停止 AI 调度循环；下一次 tick 检查到 running == false 后自然退出。
+    public void youmuStop() {
+        running.set(false);
     }
 
     private void scheduleNextTick() {
@@ -56,7 +62,8 @@ public class GhostInThePlugin {
 
     private void tick() {
 
-        if (!running.get()) return;
+        if (!running.get())
+            return;
 
         long now = System.currentTimeMillis();
 

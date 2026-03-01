@@ -7,7 +7,7 @@ import java.util.Map;
 public class FocusController {
 
     private static class FocusedPlayer {
-        double value;          // 当前衰减后的fuel
+        double value;          // 当前衰减后的 fuel
         long lastUpdate;       // 上次更新时间
 
         FocusedPlayer(double value, long lastUpdate) {
@@ -27,7 +27,7 @@ public class FocusController {
     private final double switchThreshold = 1.2;  // 切换阈值倍率
     private final double epsilon = 0.01;         // 清理阈值
 
-    // 外部调用：增加focus
+    // 外部调用：增加 focus
     public void addFocus(String playerName, double fuel) {
         long now = System.currentTimeMillis();
         FocusedPlayer player = ledger.get(playerName);
@@ -47,7 +47,7 @@ public class FocusController {
         return currentFocus;
     }
 
-    // 内部逻辑
+    // 内部逻辑：更新当前 focus
     private void updateFocus() {
         long now = System.currentTimeMillis();
 
@@ -76,6 +76,7 @@ public class FocusController {
             }
         }
 
+        // 没有活跃玩家
         if (bestPlayer == null) {
             currentFocus = null;
             return;
@@ -86,8 +87,8 @@ public class FocusController {
             return;
         }
 
-        // 如果当前没有focus，直接设置
-        if (currentFocus == null) {
+        // 当前没有 focus 或 ledger 丢失当前 focus
+        if (currentFocus == null || !ledger.containsKey(currentFocus)) {
             currentFocus = bestPlayer;
             lockUntil = now + lockDuration;
             return;
@@ -95,14 +96,13 @@ public class FocusController {
 
         FocusedPlayer current = ledger.get(currentFocus);
 
-        if (current == null) {
-            currentFocus = bestPlayer;
-            lockUntil = now + lockDuration;
-            return;
-        }
+        // 计算相对占比
+        double currentRatio = current.value / total;
+        double bestRatio = bestValue / total;
 
-        // 滞回控制：新玩家必须超过一定倍率才切换
-        if (bestValue > current.value * switchThreshold) {
+        // 滞回控制 + 占比阈值
+        // 当最佳玩家的占比明显超过当前玩家时才切换
+        if (bestRatio > currentRatio * switchThreshold) {
             currentFocus = bestPlayer;
             lockUntil = now + lockDuration;
         }
