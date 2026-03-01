@@ -111,7 +111,7 @@ public class YoumuChan {
                 youmuTemperature,
                 timeWindowMs);
 
-        ApiProcessor apiProcessor = new ApiProcessor(apiKey, apiUrl, debugMode, logger);
+        ApiProcessor apiProcessor = new ApiProcessor(apiKey, apiUrl, debugMode, logger, proxyServer);
         FocusController focusController = new FocusController();
         // 推理通道：边界分析模型 + 主对话模型串联调用。
         KaianPassageway passageway = new KaianPassageway(

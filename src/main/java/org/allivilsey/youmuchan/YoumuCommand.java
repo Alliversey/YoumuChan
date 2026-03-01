@@ -21,18 +21,25 @@ public class YoumuCommand implements SimpleCommand {
         String[] args = invocation.arguments();
 
         if (args.length == 0) {
-            invocation.source().sendMessage(
-                    Component.text("用法: /youmu <reload|start|stop> [duration(h/m/s/ms)]", NamedTextColor.YELLOW));
+            sendHelpMessage(invocation);
             return;
         }
 
         switch (args[0].toLowerCase()) {
             case "reload" -> {
+                if (!invocation.source().hasPermission("youmuchan.reload")) {
+                    invocation.source().sendMessage(Component.text("没有权限执行此命令。", NamedTextColor.RED));
+                    return;
+                }
                 plugin.reload();
                 invocation.source().sendMessage(
                         Component.text("YoumuChan 配置已重载。", NamedTextColor.GREEN));
             }
             case "start" -> {
+                if (!invocation.source().hasPermission("youmuchan.start")) {
+                    invocation.source().sendMessage(Component.text("没有权限执行此命令。", NamedTextColor.RED));
+                    return;
+                }
                 long duration = parseDuration(args);
                 if (duration == -1) {
                     invocation.source().sendMessage(
@@ -46,6 +53,10 @@ public class YoumuCommand implements SimpleCommand {
                                 NamedTextColor.GREEN));
             }
             case "stop" -> {
+                if (!invocation.source().hasPermission("youmuchan.stop")) {
+                    invocation.source().sendMessage(Component.text("没有权限执行此命令。", NamedTextColor.RED));
+                    return;
+                }
                 long duration = parseDuration(args);
                 plugin.getMentalStateController().setMentalState(MentalState.SLEEP, duration);
                 invocation.source().sendMessage(
@@ -54,8 +65,25 @@ public class YoumuCommand implements SimpleCommand {
                                 : "YoumuChan 已切换至 SLEEP 状态，持续 " + duration + " ms。",
                                 NamedTextColor.GREEN));
             }
-            default -> invocation.source().sendMessage(
-                    Component.text("未知子命令。用法: /youmu <reload|start|stop> [duration(h/m/s/ms)]", NamedTextColor.RED));
+            default -> {
+                invocation.source().sendMessage(Component.text("未知子命令。", NamedTextColor.RED));
+                sendHelpMessage(invocation);
+            }
+        }
+    }
+
+    private void sendHelpMessage(Invocation invocation) {
+        invocation.source().sendMessage(Component.text("YoumuChan 命令列表:", NamedTextColor.YELLOW));
+        if (invocation.source().hasPermission("youmuchan.reload")) {
+            invocation.source().sendMessage(Component.text(" - /youmu reload : 重载配置", NamedTextColor.YELLOW));
+        }
+        if (invocation.source().hasPermission("youmuchan.start")) {
+            invocation.source()
+                    .sendMessage(Component.text(" - /youmu start [时间] : 切换至 DREAM 状态", NamedTextColor.YELLOW));
+        }
+        if (invocation.source().hasPermission("youmuchan.stop")) {
+            invocation.source()
+                    .sendMessage(Component.text(" - /youmu stop [时间] : 切换至 SLEEP 状态", NamedTextColor.YELLOW));
         }
     }
 
@@ -90,13 +118,22 @@ public class YoumuCommand implements SimpleCommand {
     public CompletableFuture<List<String>> suggestAsync(Invocation invocation) {
         String[] args = invocation.arguments();
         if (args.length <= 1) {
-            return CompletableFuture.completedFuture(List.of("reload", "start", "stop"));
+            java.util.List<String> suggestions = new java.util.ArrayList<>();
+            if (invocation.source().hasPermission("youmuchan.reload"))
+                suggestions.add("reload");
+            if (invocation.source().hasPermission("youmuchan.start"))
+                suggestions.add("start");
+            if (invocation.source().hasPermission("youmuchan.stop"))
+                suggestions.add("stop");
+            return CompletableFuture.completedFuture(suggestions);
         }
         return CompletableFuture.completedFuture(List.of());
     }
 
     @Override
     public boolean hasPermission(Invocation invocation) {
-        return invocation.source().hasPermission("youmuchan.reload");
+        return invocation.source().hasPermission("youmuchan.reload") ||
+                invocation.source().hasPermission("youmuchan.start") ||
+                invocation.source().hasPermission("youmuchan.stop");
     }
 }

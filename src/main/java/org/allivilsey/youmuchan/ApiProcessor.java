@@ -8,6 +8,9 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.slf4j.Logger;
+import com.velocitypowered.api.proxy.ProxyServer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -24,12 +27,14 @@ public class ApiProcessor {
     private final String apiUrl;
     private final boolean debugMode;
     private final Logger logger;
+    private final ProxyServer proxyServer;
 
-    public ApiProcessor(String apiKey, String apiUrl, boolean debugMode, Logger logger) {
+    public ApiProcessor(String apiKey, String apiUrl, boolean debugMode, Logger logger, ProxyServer proxyServer) {
         this.apiKey = apiKey;
         this.apiUrl = apiUrl;
         this.debugMode = debugMode;
         this.logger = logger;
+        this.proxyServer = proxyServer;
     }
 
     // 发送用户消息，返回AI回复文本
@@ -70,9 +75,11 @@ public class ApiProcessor {
         }
 
         if (debugMode) {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            String prettyJson = gson.toJson(JsonParser.parseString(root.toString()));
-            logger.info("[debug_mode][send]\n{}", prettyJson);
+            Component formattedRequest = DebugFormatter.formatRequest(root.toString());
+            proxyServer.getConsoleCommandSource().sendMessage(
+                    Component.text("[debug_mode]", NamedTextColor.YELLOW)
+                            .append(Component.text("[send]\n", NamedTextColor.GREEN))
+                            .append(formattedRequest));
         }
 
         // 将JSON字符串包装为请求
@@ -89,15 +96,19 @@ public class ApiProcessor {
             ResponseBody rawBody = response.body();
             String responseBody = rawBody == null ? "" : rawBody.string();
 
+            String parsedResult = AIYoumuResultParser.parseReplay(responseBody);
+            long elapsedTime = System.currentTimeMillis() - context.getRequestTime();
+
             if (debugMode) {
                 try {
-                    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                    JsonElement je = JsonParser.parseString(responseBody);
-                    String prettyResp = gson.toJson(je);
-                    logger.info("[debug_mode][recv]\n{}", prettyResp);
+                    Component formattedResponse = DebugFormatter.formatResponse(responseBody, elapsedTime);
+                    proxyServer.getConsoleCommandSource().sendMessage(
+                            Component.text("[debug_mode]", NamedTextColor.YELLOW)
+                                    .append(Component.text("[recv]\n", NamedTextColor.AQUA))
+                                    .append(formattedResponse));
                 } catch (Exception e) {
                     // 如果不是合法 JSON，就直接打印原始字符串
-                    logger.info("[debug_mode][recv] {}", responseBody);
+                    logger.info("[debug_mode][recv] {} (time: {}ms)", responseBody, elapsedTime);
                 }
             }
 
@@ -105,7 +116,7 @@ public class ApiProcessor {
                 throw new IOException("API错误：" + response.code() + " / " + responseBody);
             }
 
-            return AIYoumuResultParser.parseReplay(responseBody);
+            return parsedResult;
         }
     }
 }
