@@ -87,6 +87,15 @@ public class YoumuCommand implements SimpleCommand {
                 invocation.source().sendMessage(
                         Component.text("YoumuChan Debug 模式已" + (newMode ? "开启" : "关闭") + "。", NamedTextColor.GREEN));
             }
+            case "clear" -> {
+                if (!invocation.source().hasPermission("youmuchan.clear")) {
+                    invocation.source().sendMessage(Component.text("没有权限执行此命令。", NamedTextColor.RED));
+                    return;
+                }
+                plugin.getInGameInfoCollector().clearInfo();
+                invocation.source().sendMessage(
+                        Component.text("已清除所有聊天记录缓存。", NamedTextColor.GREEN));
+            }
             default -> {
                 invocation.source().sendMessage(Component.text("未知子命令。", NamedTextColor.RED));
                 sendHelpMessage(invocation);
@@ -110,6 +119,10 @@ public class YoumuCommand implements SimpleCommand {
         if (invocation.source().hasPermission("youmuchan.debug")) {
             invocation.source()
                     .sendMessage(Component.text(" - /youmu debug : 切换 Debug 模式", NamedTextColor.YELLOW));
+        }
+        if (invocation.source().hasPermission("youmuchan.clear")) {
+            invocation.source()
+                    .sendMessage(Component.text(" - /youmu clear : 清除聊天记录缓存", NamedTextColor.YELLOW));
         }
     }
 
@@ -153,6 +166,8 @@ public class YoumuCommand implements SimpleCommand {
                 suggestions.add("stop");
             if (invocation.source().hasPermission("youmuchan.debug"))
                 suggestions.add("debug");
+            if (invocation.source().hasPermission("youmuchan.clear"))
+                suggestions.add("clear");
             return CompletableFuture.completedFuture(suggestions);
         } else if (args.length == 2 && args[0].equalsIgnoreCase("debug")) {
             if (invocation.source().hasPermission("youmuchan.debug")) {
@@ -167,6 +182,7 @@ public class YoumuCommand implements SimpleCommand {
         return invocation.source().hasPermission("youmuchan.reload") ||
                 invocation.source().hasPermission("youmuchan.start") ||
                 invocation.source().hasPermission("youmuchan.stop") ||
-                invocation.source().hasPermission("youmuchan.debug");
+                invocation.source().hasPermission("youmuchan.debug") ||
+                invocation.source().hasPermission("youmuchan.clear");
     }
 }

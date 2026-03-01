@@ -39,7 +39,7 @@ public class MentalStateController {
         int onlinePlayers = server.getPlayerCount();
 
         // 在线人数为 0 或时间早于 10:00 时进入休眠，以减少空场景下的无效调用。
-        if (onlinePlayers == 0 || hour < 8) {
+        if (onlinePlayers == 0 || (hour < 8 && hour > 2)) {
             return MentalState.SLEEP;
         }
 

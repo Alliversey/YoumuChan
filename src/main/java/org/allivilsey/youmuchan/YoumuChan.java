@@ -26,6 +26,7 @@ public class YoumuChan {
     private GhostInThePlugin ghostInThePlugin;
     private MentalStateController mentalStateController;
     private DebugInfo debugInfo;
+    private InGameInfoCollector collector;
 
     @Inject
     public YoumuChan(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataDirectory) {
@@ -93,7 +94,7 @@ public class YoumuChan {
         logger.info("YoumuChan 正在启动");
 
         // 采集层：记录游戏内事件并按时间窗口提供检索。
-        InGameInfoCollector collector = new InGameInfoCollector(
+        this.collector = new InGameInfoCollector(
                 cacheDurationMs,
                 cacheMaxSize);
 
@@ -146,7 +147,8 @@ public class YoumuChan {
                 this,
                 heatController,
                 focusController,
-                ghostInThePlugin);
+                ghostInThePlugin,
+                collector);
         debugInfo.start();
 
         ghostInThePlugin.youmuStart();
@@ -189,6 +191,10 @@ public class YoumuChan {
 
     public DebugInfo getDebugInfo() {
         return debugInfo;
+    }
+
+    public InGameInfoCollector getInGameInfoCollector() {
+        return collector;
     }
 
     // 加载配置文件；不存在时先写入默认模板。

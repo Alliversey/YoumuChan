@@ -17,21 +17,24 @@ public class DebugInfo {
     private final HeatController heatController;
     private final FocusController focusController;
     private final GhostInThePlugin ghostInThePlugin;
+    private final InGameInfoCollector collector;
 
     // 为每个玩家维护一个独立的 BossBar
     private final Map<Player, BossBar> debugBars = new ConcurrentHashMap<>();
 
     public DebugInfo(ProxyServer proxyServer,
-                     Object plugin,
-                     HeatController heatController,
-                     FocusController focusController,
-                     GhostInThePlugin ghostInThePlugin) {
+            Object plugin,
+            HeatController heatController,
+            FocusController focusController,
+            GhostInThePlugin ghostInThePlugin,
+            InGameInfoCollector collector) {
 
         this.proxyServer = proxyServer;
         this.plugin = plugin;
         this.heatController = heatController;
         this.focusController = focusController;
         this.ghostInThePlugin = ghostInThePlugin;
+        this.collector = collector;
     }
 
     public void start() {
@@ -54,8 +57,7 @@ public class DebugInfo {
                 Component.text("Debug Initializing...", NamedTextColor.AQUA),
                 0.0f,
                 BossBar.Color.BLUE,
-                BossBar.Overlay.PROGRESS
-        );
+                BossBar.Overlay.PROGRESS);
 
         debugBars.put(player, bar);
         player.showBossBar(bar);
@@ -84,13 +86,18 @@ public class DebugInfo {
         // 如果 heat 不是 0~1，需要手动归一化
         float progress = (float) Math.max(0.0, Math.min(1.0, heat));
 
+        int cacheSize = collector.getInfoListSize();
+
         Component content = Component.text()
                 .append(Component.text("Heat: " + String.format("%.3f", heat) + " | ", NamedTextColor.AQUA))
                 .append(Component.text("Fuel: " + String.format("%.3f", fuel) + " | ", NamedTextColor.AQUA))
-                .append(Component.text("TargetPlayer: " + targetStr + " | ", NamedTextColor.AQUA))
+                .append(Component.text("Cache: " + cacheSize + " | ", NamedTextColor.AQUA))
+                .append(Component.text("TgtPlayer: " + targetStr + " | ", NamedTextColor.AQUA))
                 .append(Component.text("FocusScore: " + String.format("%.3f", focusScore) + " | ", NamedTextColor.AQUA))
-                .append(Component.text("FocusRemaining: " + String.format("%.2f", lockTimeMs / 1000.0) + "s | ", NamedTextColor.AQUA))
-                .append(Component.text("NextPulse: " + String.format("%.2f", pulseTimeMs / 1000.0) + "s", NamedTextColor.AQUA))
+                .append(Component.text("FocusRemain: " + String.format("%.2f", lockTimeMs / 1000.0) + "s | ",
+                        NamedTextColor.AQUA))
+                .append(Component.text("NextPulse: " + String.format("%.2f", pulseTimeMs / 1000.0) + "s",
+                        NamedTextColor.AQUA))
                 .build();
 
         for (Map.Entry<Player, BossBar> entry : debugBars.entrySet()) {
