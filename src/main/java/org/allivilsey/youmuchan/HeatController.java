@@ -31,6 +31,11 @@ public class HeatController {
         return mapHeat();
     }
 
+    public synchronized double getFuel() {
+        decay();
+        return fuel;
+    }
+
     // 对燃料执行指数衰减：fuel(t)=fuel(0)*e^(-lambda*t)。
     private void decay() {
         long now = System.currentTimeMillis();

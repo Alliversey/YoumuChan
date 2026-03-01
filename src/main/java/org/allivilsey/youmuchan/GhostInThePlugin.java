@@ -100,6 +100,11 @@ public class GhostInThePlugin {
         return baseInterval;
     }
 
+    public long getNextPulseTime() {
+        long now = System.currentTimeMillis();
+        return Math.max(0, nextPulseTime - now);
+    }
+
     private void triggerAICycle(MentalState state) {
 
         server.getScheduler().buildTask(plugin, () -> {

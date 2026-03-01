@@ -25,6 +25,7 @@ public class YoumuChan {
 
     private GhostInThePlugin ghostInThePlugin;
     private MentalStateController mentalStateController;
+    private DebugInfo debugInfo;
 
     @Inject
     public YoumuChan(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataDirectory) {
@@ -140,6 +141,14 @@ public class YoumuChan {
                 messageSender,
                 baseIntervalMs);
 
+        debugInfo = new DebugInfo(
+                proxyServer,
+                this,
+                heatController,
+                focusController,
+                ghostInThePlugin);
+        debugInfo.start();
+
         ghostInThePlugin.youmuStart();
     }
 
@@ -176,6 +185,10 @@ public class YoumuChan {
     // 返回心智状态控制器，供命令处理器直接调用。
     public MentalStateController getMentalStateController() {
         return mentalStateController;
+    }
+
+    public DebugInfo getDebugInfo() {
+        return debugInfo;
     }
 
     // 加载配置文件；不存在时先写入默认模板。

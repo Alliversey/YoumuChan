@@ -66,6 +66,19 @@ public class YoumuCommand implements SimpleCommand {
                                 NamedTextColor.GREEN));
             }
             case "debug" -> {
+                if (args.length > 1 && args[1].equalsIgnoreCase("info")) {
+                    if (!invocation.source().hasPermission("youmuchan.debug")) {
+                        invocation.source().sendMessage(Component.text("没有权限执行此命令。", NamedTextColor.RED));
+                        return;
+                    }
+                    if (invocation.source() instanceof com.velocitypowered.api.proxy.Player player) {
+                        plugin.getDebugInfo().togglePlayer(player);
+                    } else {
+                        invocation.source().sendMessage(Component.text("只有玩家可以使用此命令。", NamedTextColor.RED));
+                    }
+                    return;
+                }
+
                 if (!invocation.source().hasPermission("youmuchan.debug")) {
                     invocation.source().sendMessage(Component.text("没有权限执行此命令。", NamedTextColor.RED));
                     return;
@@ -141,6 +154,10 @@ public class YoumuCommand implements SimpleCommand {
             if (invocation.source().hasPermission("youmuchan.debug"))
                 suggestions.add("debug");
             return CompletableFuture.completedFuture(suggestions);
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("debug")) {
+            if (invocation.source().hasPermission("youmuchan.debug")) {
+                return CompletableFuture.completedFuture(List.of("info"));
+            }
         }
         return CompletableFuture.completedFuture(List.of());
     }

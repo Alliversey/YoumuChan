@@ -7,8 +7,8 @@ import java.util.Map;
 public class FocusController {
 
     private static class FocusedPlayer {
-        double value;          // 当前衰减后的 fuel
-        long lastUpdate;       // 上次更新时间
+        double value; // 当前衰减后的 fuel
+        long lastUpdate; // 上次更新时间
 
         FocusedPlayer(double value, long lastUpdate) {
             this.value = value;
@@ -22,10 +22,10 @@ public class FocusController {
     private long lockUntil = 0;
 
     // 参数
-    private final double lambda = 0.15;          // 衰减系数
-    private final long lockDuration = 15000;     // 锁定时长(ms)
-    private final double switchThreshold = 1.2;  // 切换阈值倍率
-    private final double epsilon = 0.01;         // 清理阈值
+    private final double lambda = 0.15; // 衰减系数
+    private final long lockDuration = 15000; // 锁定时长(ms)
+    private final double switchThreshold = 1.2; // 切换阈值倍率
+    private final double epsilon = 0.01; // 清理阈值
 
     // 外部调用：增加 focus
     public void addFocus(String playerName, double fuel) {
@@ -45,6 +45,17 @@ public class FocusController {
     public String getCurrentFocus() {
         updateFocus();
         return currentFocus;
+    }
+
+    public double getFocusScore(String playerName) {
+        updateFocus();
+        FocusedPlayer player = ledger.get(playerName);
+        return player != null ? player.value : 0.0;
+    }
+
+    public long getLockRemainingTime() {
+        long now = System.currentTimeMillis();
+        return Math.max(0, lockUntil - now);
     }
 
     // 内部逻辑：更新当前 focus
