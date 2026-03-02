@@ -125,7 +125,7 @@ public class YoumuChan {
                 youmuModel,
                 youmuTemperature);
 
-        mentalStateController = new MentalStateController(proxyServer);
+        mentalStateController = new MentalStateController(proxyServer, debugMode);
 
         // 直接广播消息到各个子服，并使用配置名称作为消息前缀。
         MessageSender messageSender = new MessageSender(proxyServer, youmuName, collector);

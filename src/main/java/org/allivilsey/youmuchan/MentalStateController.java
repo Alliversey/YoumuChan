@@ -2,11 +2,10 @@ package org.allivilsey.youmuchan;
 
 import com.velocitypowered.api.proxy.ProxyServer;
 
-import java.time.LocalTime;
-
 public class MentalStateController {
 
     private final ProxyServer server;
+    private final boolean debugMode;
 
     // 控制器初始化时默认处于 SLEEP，避免插件刚启动就触发主动发言。
     private MentalState currentMentalState = MentalState.SLEEP;
@@ -16,8 +15,9 @@ public class MentalStateController {
     // 默认状态切换冷却时长，用于抑制短时间内频繁抖动。
     private final long defaultCooldownMilliseconds = 60_000L;
 
-    public MentalStateController(ProxyServer server) {
+    public MentalStateController(ProxyServer server, boolean debugMode) {
         this.server = server;
+        this.debugMode = debugMode;
     }
 
     // 由外部调度器周期调用：按当前环境重新评估目标状态，并在满足冷却条件时执行切换。
@@ -33,17 +33,19 @@ public class MentalStateController {
         }
     }
 
-    // 默认决策逻辑：依据北京时间与在线人数在 SLEEP 和 DREAM 间切换。
+    // 默认决策逻辑：依据在线人数在 SLEEP 和 DREAM 间切换。
     private MentalState decideState() {
 
-        // 获取北京时间的小时值，作为昼夜判定依据。
-        int hour = LocalTime.now(java.time.ZoneId.of("Asia/Shanghai")).getHour();
+        //debug模式下需有专门玩家监控
+        if (debugMode && hasDebugPlayerOnline()) {
+            return MentalState.SLEEP;
+        }
 
         // 获取代理当前在线人数。
         int onlinePlayers = server.getPlayerCount();
 
-        // 在线人数为 0 或时间早于 10:00 时进入休眠，以减少空场景下的无效调用。
-        if (onlinePlayers == 0 || (hour < 8 && hour > 2)) {
+        // 在线人数为 0 时进入休眠，以减少空场景下的无效调用。
+        if (onlinePlayers == 0) {
             return MentalState.SLEEP;
         }
 
@@ -77,5 +79,9 @@ public class MentalStateController {
 
         long now = System.currentTimeMillis();
         return now >= nextStateChangeTime;
+    }
+
+    private boolean hasDebugPlayerOnline() {
+        return server.getAllPlayers().stream().anyMatch(player -> player.hasPermission("youmu.debug"));
     }
 }
