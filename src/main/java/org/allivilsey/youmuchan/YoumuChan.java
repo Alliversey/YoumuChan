@@ -94,9 +94,7 @@ public class YoumuChan {
         logger.info("YoumuChan 正在启动");
 
         // 采集层：记录游戏内事件并按时间窗口提供检索。
-        this.collector = new InGameInfoCollector(
-                cacheDurationMs,
-                cacheMaxSize);
+        this.collector = new InGameInfoCollector(cacheDurationMs, cacheMaxSize, proxyServer);
 
         // 热度层：根据玩家行为动态调整 AI 调度节奏。
         HeatController heatController = new HeatController(halfLifeSeconds);
@@ -119,7 +117,7 @@ public class YoumuChan {
         KaianPassageway passageway = new KaianPassageway(
                 contextBuilder,
                 new AIBorderPromptFormatter(),
-                new AIYoumuPromptFormatter(focusController),
+                new AIYoumuPromptFormatter(focusController, collector),
                 apiProcessor,
                 borderModel,
                 borderTemperature,

@@ -1,9 +1,11 @@
 package org.allivilsey.youmuchan;
 
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ProxyServer;
+
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.stream.Collectors;
 
 public class InGameInfoCollector {
 
@@ -15,9 +17,12 @@ public class InGameInfoCollector {
     //记录条目数量限制
     private final int maxBufferSize;
 
-    public InGameInfoCollector(long maxCacheDurationMillis, int maxBufferSize) {
+    private final ProxyServer proxyServer;
+
+    public InGameInfoCollector(long maxCacheDurationMillis, int maxBufferSize, ProxyServer proxyServer) {
         this.maxCacheDurationMillis = maxCacheDurationMillis;
         this.maxBufferSize = maxBufferSize;
+        this.proxyServer = proxyServer;
     }
 
     //添加新数据
@@ -116,4 +121,16 @@ public class InGameInfoCollector {
         infoBuffer.clear();
     }
 
+    //获取在线玩家列表
+    public String getOnlinePlayerList() {
+        Collection<Player> players = proxyServer.getAllPlayers();
+        if (players.isEmpty()) {
+            return "none";
+        }
+
+        return players.stream()
+                .map(Player::getUsername)
+                .sorted()
+                .collect(Collectors.joining(", "));
+    }
 }

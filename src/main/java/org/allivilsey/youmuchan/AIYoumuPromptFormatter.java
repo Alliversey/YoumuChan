@@ -6,8 +6,10 @@ import com.google.gson.JsonObject;
 public class AIYoumuPromptFormatter implements PromptFormatter {
 
     private final FocusController focusController;
-    public AIYoumuPromptFormatter(FocusController focusController) {
+    private final InGameInfoCollector collector;
+    public AIYoumuPromptFormatter(FocusController focusController, InGameInfoCollector collector) {
         this.focusController = focusController;
+        this.collector = collector;
     }
 
     @Override
@@ -42,6 +44,8 @@ public class AIYoumuPromptFormatter implements PromptFormatter {
         JsonObject userPrompt = new JsonObject();
 
         userPrompt.addProperty("language", "简体中文");
+
+        userPrompt.addProperty("player_list", collector.getOnlinePlayerList());
 
         userPrompt.addProperty("focused_player", context.getTargetPlayer());
 
