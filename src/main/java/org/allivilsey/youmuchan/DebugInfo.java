@@ -97,9 +97,7 @@ public class DebugInfo {
                 .build();
 
         for (Map.Entry<Player, BossBar> entry : debugBars.entrySet()) {
-            Player player = entry.getKey();
             BossBar bar = entry.getValue();
-
             bar.name(content);
             bar.progress(progress);
         }
