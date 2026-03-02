@@ -29,7 +29,7 @@ public class AIYoumuPromptFormatter implements PromptFormatter {
 
                 Perception:
                 You only know:
-                1. Chat log
+                1. Server CHAT_LOG and EVENT_LOG
                 2. Explicit SERVER_DATA (if provided)
                 3. Explicit WIKI_DATA (if provided)
 
