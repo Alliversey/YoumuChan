@@ -21,8 +21,12 @@ public class MentalStateController {
     }
 
     // 由外部调度器周期调用：按当前环境重新评估目标状态，并在满足冷却条件时执行切换。
-    public void evaluate() {
+    public void evaluate(double heat) {
         MentalState decideState = decideState();
+
+        if (heat <= 0.06) {
+            decideState = MentalState.SLEEP;
+        }
 
         if (canSwitch(decideState)) {
             setMentalState(decideState, defaultCooldownMilliseconds);

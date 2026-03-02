@@ -55,4 +55,4 @@ half_life_seconds: 30
 # 游戏内展示设置
 # ------------------------------------------
 # AI 机器人在游戏中说话时显示的虚拟玩家名称
-fictional_player_name: YoumuChan
+youmu_name: YoumuChan

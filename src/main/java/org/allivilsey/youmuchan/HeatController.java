@@ -36,7 +36,7 @@ public class HeatController {
         return fuel;
     }
 
-    // 对燃料执行指数衰减：fuel(t)=fuel(0)*e^(-lambda*t)。
+    // 对燃料执行指数衰减
     private void decay() {
         long now = System.currentTimeMillis();
         double dt = (now - lastUpdateTime) / 1000.0;

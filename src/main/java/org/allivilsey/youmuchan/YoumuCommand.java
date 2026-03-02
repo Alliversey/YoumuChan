@@ -96,6 +96,69 @@ public class YoumuCommand implements SimpleCommand {
                 invocation.source().sendMessage(
                         Component.text("已清除所有聊天记录缓存。", NamedTextColor.GREEN));
             }
+            case "setmodel" -> {
+                if (!invocation.source().hasPermission("youmuchan.setmodel")) {
+                    invocation.source().sendMessage(Component.text("没有权限执行此命令。", NamedTextColor.RED));
+                    return;
+                }
+                if (args.length < 3) {
+                    invocation.source()
+                            .sendMessage(Component.text("用法: /youmu setmodel <border|youmu> <model_name>",
+                                    NamedTextColor.RED));
+                    return;
+                }
+                if (args[1].equalsIgnoreCase("border")) {
+                    String modelName = args[2];
+                    if (plugin.setBorderModel(modelName)) {
+                        invocation.source()
+                                .sendMessage(Component.text("边界分析模型已更新为: " + modelName, NamedTextColor.GREEN));
+                    } else {
+                        invocation.source().sendMessage(Component.text("更新失败，请检查控制台。", NamedTextColor.RED));
+                    }
+                } else if (args[1].equalsIgnoreCase("youmu")) {
+                    String modelName = args[2];
+                    if (plugin.setYoumuModel(modelName)) {
+                        invocation.source()
+                                .sendMessage(Component.text("妖梦对话模型已更新为: " + modelName, NamedTextColor.GREEN));
+                    } else {
+                        invocation.source().sendMessage(Component.text("更新失败，请检查控制台。", NamedTextColor.RED));
+                    }
+                } else {
+                    invocation.source().sendMessage(Component.text("未知子命令，目前支持: border, youmu", NamedTextColor.RED));
+                }
+            }
+            case "setkey" -> {
+                if (!invocation.source().hasPermission("youmuchan.setkey")) {
+                    invocation.source().sendMessage(Component.text("没有权限执行此命令。", NamedTextColor.RED));
+                    return;
+                }
+                if (args.length < 2) {
+                    invocation.source().sendMessage(Component.text("用法: /youmu setkey <api_key>", NamedTextColor.RED));
+                    return;
+                }
+                String apiKey = args[1];
+                if (plugin.setApiKey(apiKey)) {
+                    invocation.source().sendMessage(Component.text("API Key 已更新。", NamedTextColor.GREEN));
+                } else {
+                    invocation.source().sendMessage(Component.text("更新失败，请检查控制台。", NamedTextColor.RED));
+                }
+            }
+            case "seturl" -> {
+                if (!invocation.source().hasPermission("youmuchan.seturl")) {
+                    invocation.source().sendMessage(Component.text("没有权限执行此命令。", NamedTextColor.RED));
+                    return;
+                }
+                if (args.length < 2) {
+                    invocation.source().sendMessage(Component.text("用法: /youmu seturl <api_url>", NamedTextColor.RED));
+                    return;
+                }
+                String apiUrl = args[1];
+                if (plugin.setApiUrl(apiUrl)) {
+                    invocation.source().sendMessage(Component.text("API URL 已更新。", NamedTextColor.GREEN));
+                } else {
+                    invocation.source().sendMessage(Component.text("更新失败，请检查控制台。", NamedTextColor.RED));
+                }
+            }
             default -> {
                 invocation.source().sendMessage(Component.text("未知子命令。", NamedTextColor.RED));
                 sendHelpMessage(invocation);
@@ -123,6 +186,22 @@ public class YoumuCommand implements SimpleCommand {
         if (invocation.source().hasPermission("youmuchan.clear")) {
             invocation.source()
                     .sendMessage(Component.text(" - /youmu clear : 清除聊天记录缓存", NamedTextColor.YELLOW));
+        }
+        if (invocation.source().hasPermission("youmuchan.setmodel")) {
+            invocation.source()
+                    .sendMessage(
+                            Component.text(" - /youmu setmodel border <model_name> : 设置边界分析模型", NamedTextColor.YELLOW));
+            invocation.source()
+                    .sendMessage(
+                            Component.text(" - /youmu setmodel youmu <model_name> : 设置妖梦对话模型", NamedTextColor.YELLOW));
+        }
+        if (invocation.source().hasPermission("youmuchan.setkey")) {
+            invocation.source()
+                    .sendMessage(Component.text(" - /youmu setkey <api_key> : 设置 API Key", NamedTextColor.YELLOW));
+        }
+        if (invocation.source().hasPermission("youmuchan.seturl")) {
+            invocation.source()
+                    .sendMessage(Component.text(" - /youmu seturl <api_url> : 设置 API URL", NamedTextColor.YELLOW));
         }
     }
 
@@ -168,10 +247,20 @@ public class YoumuCommand implements SimpleCommand {
                 suggestions.add("debug");
             if (invocation.source().hasPermission("youmuchan.clear"))
                 suggestions.add("clear");
+            if (invocation.source().hasPermission("youmuchan.setmodel"))
+                suggestions.add("setmodel");
+            if (invocation.source().hasPermission("youmuchan.setkey"))
+                suggestions.add("setkey");
+            if (invocation.source().hasPermission("youmuchan.seturl"))
+                suggestions.add("seturl");
             return CompletableFuture.completedFuture(suggestions);
         } else if (args.length == 2 && args[0].equalsIgnoreCase("debug")) {
             if (invocation.source().hasPermission("youmuchan.debug")) {
                 return CompletableFuture.completedFuture(List.of("info"));
+            }
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("setmodel")) {
+            if (invocation.source().hasPermission("youmuchan.setmodel")) {
+                return CompletableFuture.completedFuture(List.of("border", "youmu"));
             }
         }
         return CompletableFuture.completedFuture(List.of());
@@ -183,6 +272,9 @@ public class YoumuCommand implements SimpleCommand {
                 invocation.source().hasPermission("youmuchan.start") ||
                 invocation.source().hasPermission("youmuchan.stop") ||
                 invocation.source().hasPermission("youmuchan.debug") ||
-                invocation.source().hasPermission("youmuchan.clear");
+                invocation.source().hasPermission("youmuchan.clear") ||
+                invocation.source().hasPermission("youmuchan.setmodel") ||
+                invocation.source().hasPermission("youmuchan.setkey") ||
+                invocation.source().hasPermission("youmuchan.seturl");
     }
 }

@@ -72,7 +72,7 @@ public class GhostInThePlugin {
         if (now - lastPulseTime >= dynamicInterval
                 && aiBusy.compareAndSet(false, true)) {
 
-            mentalStateController.evaluate();
+            mentalStateController.evaluate(heatController.getHeat());
             MentalState state = mentalStateController.getCurrentMentalState();
 
             if (state == MentalState.SLEEP) {

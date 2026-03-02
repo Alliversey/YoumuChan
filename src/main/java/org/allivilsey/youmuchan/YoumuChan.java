@@ -90,7 +90,7 @@ public class YoumuChan {
         long cacheDurationMs = config.node("cache_duration_ms").getLong(300000L);
         int cacheMaxSize = config.node("cache_max_size").getInt(100);
         double halfLifeSeconds = config.node("half_life_seconds").getDouble(30.0);
-        String broadcasterName = config.node("fictional_player_name").getString("YoumuChan");
+        String youmuName = config.node("youmu_name").getString("YoumuChan");
 
         logger.info("YoumuChan 正在启动");
 
@@ -128,7 +128,7 @@ public class YoumuChan {
         mentalStateController = new MentalStateController(proxyServer);
 
         // 直接广播消息到各个子服，并使用配置名称作为消息前缀。
-        MessageSender messageSender = new MessageSender(proxyServer, broadcasterName, collector);
+        MessageSender messageSender = new MessageSender(proxyServer, youmuName, collector);
 
         // 启动总调度器。
         ghostInThePlugin = new GhostInThePlugin(
@@ -177,6 +177,118 @@ public class YoumuChan {
 
             reload();
             return newMode;
+        } catch (IOException e) {
+            logger.error("配置文件修改失败", e);
+            return false;
+        }
+    }
+
+    // 设置边界分析模型，修改配置并重载
+    public boolean setBorderModel(String modelName) {
+        Path configFile = dataDirectory.resolve("config.yml");
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+                .path(configFile)
+                .build();
+        try {
+            loader.load();
+
+            // 使用文本替换来保留 YAML 文件中的注释和格式
+            java.util.List<String> lines = Files.readAllLines(configFile);
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+                if (line.trim().startsWith("border_model:")) {
+                    lines.set(i, "border_model: " + modelName);
+                    break;
+                }
+            }
+            Files.write(configFile, lines);
+
+            reload();
+            return true;
+        } catch (IOException e) {
+            logger.error("配置文件修改失败", e);
+            return false;
+        }
+    }
+
+    // 设置妖梦对话模型，修改配置并重载
+    public boolean setYoumuModel(String modelName) {
+        Path configFile = dataDirectory.resolve("config.yml");
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+                .path(configFile)
+                .build();
+        try {
+            loader.load();
+
+            // 使用文本替换来保留 YAML 文件中的注释和格式
+            java.util.List<String> lines = Files.readAllLines(configFile);
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+                if (line.trim().startsWith("youmu_model:")) {
+                    lines.set(i, "youmu_model: " + modelName);
+                    break;
+                }
+            }
+            Files.write(configFile, lines);
+
+            reload();
+            return true;
+        } catch (IOException e) {
+            logger.error("配置文件修改失败", e);
+            return false;
+        }
+    }
+
+    // 设置 API Key，修改配置并重载
+    public boolean setApiKey(String apiKey) {
+        Path configFile = dataDirectory.resolve("config.yml");
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+                .path(configFile)
+                .build();
+        try {
+            loader.load();
+
+            // 使用文本替换来保留 YAML 文件中的注释和格式
+            java.util.List<String> lines = Files.readAllLines(configFile);
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+                if (line.trim().startsWith("api_key:")) {
+                    lines.set(i, "api_key: \"" + apiKey + "\"");
+                    break;
+                }
+            }
+            Files.write(configFile, lines);
+
+            reload();
+            return true;
+        } catch (IOException e) {
+            logger.error("配置文件修改失败", e);
+            return false;
+        }
+    }
+
+    // 设置 API URL，修改配置并重载
+    public boolean setApiUrl(String apiUrl) {
+        Path configFile = dataDirectory.resolve("config.yml");
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+                .path(configFile)
+                .build();
+        try {
+            loader.load();
+
+            // 使用文本替换来保留 YAML 文件中的注释和格式
+            java.util.List<String> lines = Files.readAllLines(configFile);
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
+                if (line.trim().startsWith("api_url:")) {
+                    lines.set(i, "api_url: \"" + apiUrl + "\"");
+                    break;
+                }
+            }
+            Files.write(configFile, lines);
+
+            reload();
+            return true;
         } catch (IOException e) {
             logger.error("配置文件修改失败", e);
             return false;

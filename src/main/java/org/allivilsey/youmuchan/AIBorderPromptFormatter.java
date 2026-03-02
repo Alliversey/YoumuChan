@@ -39,7 +39,6 @@ public class AIBorderPromptFormatter implements PromptFormatter {
         JsonArray chatLogs = new JsonArray();
         context.getFilteredInfos().forEach(info -> {
             JsonObject line = new JsonObject();
-            line.addProperty("type", info.getInfoType().name());
             line.addProperty("player", info.getPlayerName());
             line.addProperty("content", info.getContent());
             chatLogs.add(line);
