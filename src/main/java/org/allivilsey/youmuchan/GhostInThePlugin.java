@@ -21,7 +21,7 @@ public class GhostInThePlugin {
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final AtomicBoolean aiBusy = new AtomicBoolean(false);
 
-    private long nextPulseTime = 0L;
+    private long lastPulseTime = 0L;
 
     public GhostInThePlugin(
             ProxyServer server,
@@ -46,7 +46,8 @@ public class GhostInThePlugin {
     public void youmuStart() {
         if (!running.compareAndSet(false, true))
             return;
-        nextPulseTime = System.currentTimeMillis();
+
+        lastPulseTime = System.currentTimeMillis();
         scheduleNextTick();
     }
 
@@ -66,23 +67,22 @@ public class GhostInThePlugin {
             return;
 
         long now = System.currentTimeMillis();
+        long dynamicInterval = computeInterval();
 
-        if (now >= nextPulseTime && aiBusy.compareAndSet(false, true)) {
+        if (now - lastPulseTime >= dynamicInterval
+                && aiBusy.compareAndSet(false, true)) {
 
             mentalStateController.evaluate();
             MentalState state = mentalStateController.getCurrentMentalState();
 
-            // 在 SLEEP 状态下跳过本轮推理，仅推进下一次触发时间。
             if (state == MentalState.SLEEP) {
                 aiBusy.set(false);
-                nextPulseTime = now + baseInterval;
+                lastPulseTime = now;
                 scheduleNextTick();
                 return;
             }
 
-            nextPulseTime = now + computeInterval();
-
-            // 将推理放到独立任务中，避免阻塞轮询心跳。
+            lastPulseTime = now;
             triggerAICycle(state);
         }
 
@@ -97,12 +97,13 @@ public class GhostInThePlugin {
             return (long) (baseInterval / heat);
         }
 
-        return baseInterval;
+        return (long) (baseInterval / 0.0001);
     }
 
     public long getNextPulseTime() {
         long now = System.currentTimeMillis();
-        return Math.max(0, nextPulseTime - now);
+        long dynamicInterval = computeInterval();
+        return Math.max(0, dynamicInterval - (now - lastPulseTime));
     }
 
     private void triggerAICycle(MentalState state) {

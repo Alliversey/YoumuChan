@@ -91,8 +91,8 @@ public class DebugInfo {
                 .append(Component.text("Fuel: " + String.format("%.3f", fuel) + " | ", NamedTextColor.AQUA))
                 .append(Component.text("Cache: " + cacheSize + " | ", NamedTextColor.AQUA))
                 .append(Component.text("TgtPlayer: " + targetStr + " | ", NamedTextColor.AQUA))
-                .append(Component.text("FocusScore: " + String.format("%.3f", focusScore) + " | ", NamedTextColor.AQUA))
-                .append(Component.text("FocusRemain: " + String.format("%.2f", lockTimeMs / 1000.0) + "s | ", NamedTextColor.AQUA))
+                .append(Component.text("TgtScore: " + String.format("%.3f", focusScore) + " | ", NamedTextColor.AQUA))
+                .append(Component.text("TgtTime: " + String.format("%.2f", lockTimeMs / 1000.0) + "s | ", NamedTextColor.AQUA))
                 .append(Component.text("NextPulse: " + String.format("%.2f", pulseTimeMs / 1000.0) + "s", NamedTextColor.AQUA))
                 .build();
 

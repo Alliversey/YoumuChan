@@ -14,7 +14,8 @@ public class AIContextBuilder {
 
     private final long timeWindowMillis;
 
-    public AIContextBuilder(InGameInfoCollector collector, HeatController heatController ,String defaultModel, float defaultTemperature, long timeWindowMillis) {
+    public AIContextBuilder(InGameInfoCollector collector, HeatController heatController, String defaultModel,
+            float defaultTemperature, long timeWindowMillis) {
         this.collector = collector;
         this.heatController = heatController;
         this.defaultModel = defaultModel;
@@ -36,7 +37,7 @@ public class AIContextBuilder {
 
         context.setRawInfos(rawInfos);
 
-        List<InGameInfo> filtered = filerByState(rawInfos, state);
+        List<InGameInfo> filtered = filterByState(rawInfos, state);
 
         context.setFilteredInfos(filtered);
 
@@ -44,10 +45,12 @@ public class AIContextBuilder {
     }
 
     // 根据心智状态裁剪信息范围，控制模型注意力与 token 消耗。
-    private List<InGameInfo> filerByState(List<InGameInfo> raw, MentalState state) {
+    private List<InGameInfo> filterByState(List<InGameInfo> raw, MentalState state) {
         if (state == MentalState.DREAM) {
-            return raw.stream().filter(info -> info.getInfoType() == InfoType.SERVER_EVENT || info.getInfoType() == InfoType.PLAYER_EVENT).collect(Collectors.toList());
+            return raw;
         }
-        return raw;
+        return raw.stream().filter(
+                info -> info.getInfoType() == InfoType.SERVER_EVENT || info.getInfoType() == InfoType.PLAYER_EVENT)
+                .collect(Collectors.toList());
     }
 }
