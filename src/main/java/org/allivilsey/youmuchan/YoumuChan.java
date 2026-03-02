@@ -27,6 +27,7 @@ public class YoumuChan {
     private MentalStateController mentalStateController;
     private DebugInfo debugInfo;
     private InGameInfoCollector collector;
+    FocusController focusController = new FocusController();
 
     @Inject
     public YoumuChan(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataDirectory) {
@@ -102,6 +103,7 @@ public class YoumuChan {
         // 注册事件监听器：信息采集与热度更新。
         proxyServer.getEventManager().register(this, new InGameInfoListener(collector));
         proxyServer.getEventManager().register(this, new HeatControllerListener(heatController));
+        proxyServer.getEventManager().register(this, new FocusControllerListener(focusController));
 
         // 上下文构建层：从采集信息生成模型输入上下文。
         AIContextBuilder contextBuilder = new AIContextBuilder(
@@ -112,7 +114,6 @@ public class YoumuChan {
                 timeWindowMs);
 
         ApiProcessor apiProcessor = new ApiProcessor(apiKey, apiUrl, debugMode, logger, proxyServer);
-        FocusController focusController = new FocusController();
         // 推理通道：边界分析模型 + 主对话模型串联调用。
         KaianPassageway passageway = new KaianPassageway(
                 contextBuilder,
