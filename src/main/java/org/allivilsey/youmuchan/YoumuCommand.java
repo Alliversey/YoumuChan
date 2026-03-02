@@ -7,7 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-// 处理 /youmu 命令，支持子命令 reload / start / stop。
+// 处理 /youmu 命令，支持子命令 reload / start / stop / debug / clear。
 public class YoumuCommand implements SimpleCommand {
 
     private final YoumuChan plugin;

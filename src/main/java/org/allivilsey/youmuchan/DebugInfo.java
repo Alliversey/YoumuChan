@@ -74,9 +74,7 @@ public class DebugInfo {
         double fuel = heatController.getFuel();
 
         String targetPlayer = focusController.getCurrentFocus();
-        double focusScore = targetPlayer != null
-                ? focusController.getFocusScore(targetPlayer)
-                : 0.0;
+        double focusScore = targetPlayer != null ? focusController.getFocusScore(targetPlayer) : 0.0;
 
         long lockTimeMs = focusController.getLockRemainingTime();
         long pulseTimeMs = ghostInThePlugin.getNextPulseTime();
@@ -94,10 +92,8 @@ public class DebugInfo {
                 .append(Component.text("Cache: " + cacheSize + " | ", NamedTextColor.AQUA))
                 .append(Component.text("TgtPlayer: " + targetStr + " | ", NamedTextColor.AQUA))
                 .append(Component.text("FocusScore: " + String.format("%.3f", focusScore) + " | ", NamedTextColor.AQUA))
-                .append(Component.text("FocusRemain: " + String.format("%.2f", lockTimeMs / 1000.0) + "s | ",
-                        NamedTextColor.AQUA))
-                .append(Component.text("NextPulse: " + String.format("%.2f", pulseTimeMs / 1000.0) + "s",
-                        NamedTextColor.AQUA))
+                .append(Component.text("FocusRemain: " + String.format("%.2f", lockTimeMs / 1000.0) + "s | ", NamedTextColor.AQUA))
+                .append(Component.text("NextPulse: " + String.format("%.2f", pulseTimeMs / 1000.0) + "s", NamedTextColor.AQUA))
                 .build();
 
         for (Map.Entry<Player, BossBar> entry : debugBars.entrySet()) {
