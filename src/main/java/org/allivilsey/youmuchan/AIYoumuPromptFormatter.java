@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public class AIYoumuPromptFormatter implements PromptFormatter {
+public class AIYoumuPromptFormatter {
 
     private final FocusController focusController;
     private final InGameInfoCollector collector;
@@ -18,7 +18,6 @@ public class AIYoumuPromptFormatter implements PromptFormatter {
         this.collector = collector;
     }
 
-    @Override
     public void format(AIContext context) {
 
         // 构建系统提示词
@@ -72,7 +71,7 @@ public class AIYoumuPromptFormatter implements PromptFormatter {
             line.addProperty("server_name", info.getServerName());
             line.addProperty("content", info.getContent());
             String timeStr = formatter.format(Instant.ofEpochMilli(info.getTimestamp()));
-            line.addProperty("timestamp", timeStr);
+            line.addProperty("time", timeStr);
             inGameLog.add(line);
         });
         userPrompt.add("in_game_log", inGameLog);

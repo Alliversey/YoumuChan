@@ -37,7 +37,7 @@ public class MentalStateController {
     private MentalState decideState() {
 
         //debug模式下需有专门玩家监控
-        if (debugMode && hasDebugPlayerOnline()) {
+        if (debugMode && !hasDebugPlayerOnline()) {
             return MentalState.SLEEP;
         }
 

@@ -6,8 +6,8 @@ public class KaianPassageway {
 
     private final AIContextBuilder contextBuilder;
 
-    private final PromptFormatter borderFormatter;
-    private final PromptFormatter youmuFormatter;
+    private final AIBorderPromptFormatter borderFormatter;
+    private final AIYoumuPromptFormatter youmuFormatter;
 
     private final ApiProcessor apiProcessor;
 
@@ -19,14 +19,13 @@ public class KaianPassageway {
 
     public KaianPassageway(
             AIContextBuilder contextBuilder,
-            PromptFormatter borderFormatter,
-            PromptFormatter youmuFormatter,
+            AIBorderPromptFormatter borderFormatter,
+            AIYoumuPromptFormatter youmuFormatter,
             ApiProcessor apiProcessor,
             String borderModel,
             Float borderTemperature,
             String mainModel,
-            Float mainTemperature
-    ) {
+            Float mainTemperature) {
         this.contextBuilder = contextBuilder;
         this.borderFormatter = borderFormatter;
         this.youmuFormatter = youmuFormatter;

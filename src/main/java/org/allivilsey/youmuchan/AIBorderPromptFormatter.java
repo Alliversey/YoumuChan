@@ -4,9 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 // Formats prompts for the border-analysis model.
-public class AIBorderPromptFormatter implements PromptFormatter {
+public class AIBorderPromptFormatter {
 
-    @Override
     public void format(AIContext context) {
 
         String systemPrompt = """
@@ -34,7 +33,6 @@ public class AIBorderPromptFormatter implements PromptFormatter {
                 """;
 
         JsonObject request = new JsonObject();
-
 
         JsonArray chatLogs = new JsonArray();
         context.getFilteredInfos().forEach(info -> {
