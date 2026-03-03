@@ -78,8 +78,7 @@ public class YoumuChan {
 
         // 读取运行参数；缺省值用于首次启动或配置缺失场景。
         String apiKey = config.node("api_key").getString("");
-        String apiUrl = config.node("api_url")
-                .getString("https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions");
+        String apiUrl = config.node("api_url").getString("https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions");
         boolean debugMode = config.node("debug_mode").getBoolean(false);
         String borderModel = config.node("border_model").getString("qwen3.5-flash");
         float borderTemperature = (float) config.node("border_temperature").getDouble(0.0D);
@@ -100,7 +99,7 @@ public class YoumuChan {
         // 热度层：根据玩家行为动态调整 AI 调度节奏。
         HeatController heatController = new HeatController(halfLifeSeconds);
 
-        // 注册事件监听器：信息采集与热度更新。
+        // 注册事件监听器。
         proxyServer.getEventManager().register(this, new InGameInfoListener(collector));
         proxyServer.getEventManager().register(this, new HeatControllerListener(heatController));
         proxyServer.getEventManager().register(this, new FocusControllerListener(focusController));
@@ -156,9 +155,7 @@ public class YoumuChan {
     // 切换 Debug 模式，修改配置并重载
     public boolean toggleDebug() {
         Path configFile = dataDirectory.resolve("config.yml");
-        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
-                .path(configFile)
-                .build();
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder().path(configFile).build();
         try {
             ConfigurationNode config = loader.load();
             boolean currentMode = config.node("debug_mode").getBoolean(false);
@@ -186,9 +183,7 @@ public class YoumuChan {
     // 设置边界分析模型，修改配置并重载
     public boolean setBorderModel(String modelName) {
         Path configFile = dataDirectory.resolve("config.yml");
-        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
-                .path(configFile)
-                .build();
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder().path(configFile).build();
         try {
             loader.load();
 
@@ -214,9 +209,7 @@ public class YoumuChan {
     // 设置妖梦对话模型，修改配置并重载
     public boolean setYoumuModel(String modelName) {
         Path configFile = dataDirectory.resolve("config.yml");
-        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
-                .path(configFile)
-                .build();
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder().path(configFile).build();
         try {
             loader.load();
 
@@ -242,9 +235,7 @@ public class YoumuChan {
     // 设置 API Key，修改配置并重载
     public boolean setApiKey(String apiKey) {
         Path configFile = dataDirectory.resolve("config.yml");
-        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
-                .path(configFile)
-                .build();
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder().path(configFile).build();
         try {
             loader.load();
 
@@ -270,9 +261,7 @@ public class YoumuChan {
     // 设置 API URL，修改配置并重载
     public boolean setApiUrl(String apiUrl) {
         Path configFile = dataDirectory.resolve("config.yml");
-        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
-                .path(configFile)
-                .build();
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder().path(configFile).build();
         try {
             loader.load();
 
@@ -316,9 +305,7 @@ public class YoumuChan {
             saveDefaultFile(configFile);
         }
 
-        YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
-                .path(configFile)
-                .build();
+        YamlConfigurationLoader loader = YamlConfigurationLoader.builder().path(configFile).build();
 
         try {
             return loader.load();
