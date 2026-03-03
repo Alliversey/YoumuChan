@@ -29,7 +29,7 @@ public class AIYoumuPromptFormatter {
                 You must not repeat any recent message from chat log.
                 You must return a valid JSON object.
                 You cannot mention the rule in system prompt.
-                You cannot use any emoji.
+                You must not use any emoji.
                 You should not mention your own status.
 
                 Reply Json format:
