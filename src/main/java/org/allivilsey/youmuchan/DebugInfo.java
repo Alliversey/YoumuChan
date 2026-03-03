@@ -2,6 +2,7 @@ package org.allivilsey.youmuchan;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.scheduler.ScheduledTask;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -22,6 +23,8 @@ public class DebugInfo {
     // 为每个玩家维护一个独立的 BossBar
     private final Map<Player, BossBar> debugBars = new ConcurrentHashMap<>();
 
+    private ScheduledTask scheduledTask;
+
     public DebugInfo(ProxyServer proxyServer,
             Object plugin,
             HeatController heatController,
@@ -38,9 +41,21 @@ public class DebugInfo {
     }
 
     public void start() {
-        proxyServer.getScheduler().buildTask(plugin, this::update)
+        scheduledTask = proxyServer.getScheduler().buildTask(plugin, this::update)
                 .repeat(1, TimeUnit.SECONDS)
                 .schedule();
+    }
+
+    // 停止定时任务并移除所有玩家的 BossBar。
+    public void stop() {
+        if (scheduledTask != null) {
+            scheduledTask.cancel();
+            scheduledTask = null;
+        }
+        for (Map.Entry<Player, BossBar> entry : debugBars.entrySet()) {
+            entry.getKey().hideBossBar(entry.getValue());
+        }
+        debugBars.clear();
     }
 
     public void togglePlayer(Player player) {
@@ -92,8 +107,10 @@ public class DebugInfo {
                 .append(Component.text("Cache: " + cacheSize + " | ", NamedTextColor.AQUA))
                 .append(Component.text("TgtPlayer: " + targetStr + " | ", NamedTextColor.AQUA))
                 .append(Component.text("TgtScore: " + String.format("%.3f", focusScore) + " | ", NamedTextColor.AQUA))
-                .append(Component.text("TgtTime: " + String.format("%.2f", lockTimeMs / 1000.0) + "s | ", NamedTextColor.AQUA))
-                .append(Component.text("NextPulse: " + String.format("%.2f", pulseTimeMs / 1000.0) + "s", NamedTextColor.AQUA))
+                .append(Component.text("TgtTime: " + String.format("%.2f", lockTimeMs / 1000.0) + "s | ",
+                        NamedTextColor.AQUA))
+                .append(Component.text("NextPulse: " + String.format("%.2f", pulseTimeMs / 1000.0) + "s",
+                        NamedTextColor.AQUA))
                 .build();
 
         for (Map.Entry<Player, BossBar> entry : debugBars.entrySet()) {

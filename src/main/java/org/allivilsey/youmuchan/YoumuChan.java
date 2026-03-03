@@ -61,6 +61,10 @@ public class YoumuChan {
     public void reload() {
         logger.info("YoumuChan 正在重载");
 
+        if (debugInfo != null) {
+            debugInfo.stop();
+        }
+
         if (ghostInThePlugin != null) {
             ghostInThePlugin.youmuStop();
         }
@@ -78,7 +82,8 @@ public class YoumuChan {
 
         // 读取运行参数；缺省值用于首次启动或配置缺失场景。
         String apiKey = config.node("api_key").getString("");
-        String apiUrl = config.node("api_url").getString("https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions");
+        String apiUrl = config.node("api_url")
+                .getString("https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions");
         boolean debugMode = config.node("debug_mode").getBoolean(false);
         String borderModel = config.node("border_model").getString("qwen3.5-flash");
         float borderTemperature = (float) config.node("border_temperature").getDouble(0.0D);
