@@ -27,7 +27,7 @@ public class YoumuChan {
     private MentalStateController mentalStateController;
     private DebugInfo debugInfo;
     private InGameInfoCollector collector;
-    FocusController focusController = new FocusController();
+    private FocusController focusController;
 
     @Inject
     public YoumuChan(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataDirectory) {
@@ -100,6 +100,9 @@ public class YoumuChan {
 
         // 采集层：记录游戏内事件并按时间窗口提供检索。
         this.collector = new InGameInfoCollector(cacheDurationMs, cacheMaxSize, proxyServer);
+
+        // 专注层：追踪玩家活跃度并决定 AI 关注目标。
+        this.focusController = new FocusController();
 
         // 热度层：根据玩家行为动态调整 AI 调度节奏。
         HeatController heatController = new HeatController(halfLifeSeconds);
