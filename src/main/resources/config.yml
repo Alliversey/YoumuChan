@@ -45,7 +45,7 @@ base_interval_ms: 20000
 cache_duration_ms: 600000
 
 # 内存中游戏事件缓存的最大条数限制
-cache_max_size: 100
+cache_max_size: 30
 
 # 热度衰减半衰期，单位：秒 (默认 30秒)
 # 玩家活跃度带来的“热度”会随时间指数衰减，半衰期越短降温越快

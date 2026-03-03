@@ -84,10 +84,10 @@ public class YoumuChan {
         float borderTemperature = (float) config.node("border_temperature").getDouble(0.0D);
         String youmuModel = config.node("youmu_model").getString("qwen3.5-plus");
         float youmuTemperature = (float) config.node("youmu_temperature").getDouble(0.7D);
-        long timeWindowMs = config.node("time_window_ms").getLong(60000L);
-        long baseIntervalMs = config.node("base_interval_ms").getLong(15000L);
-        long cacheDurationMs = config.node("cache_duration_ms").getLong(300000L);
-        int cacheMaxSize = config.node("cache_max_size").getInt(100);
+        long timeWindowMs = config.node("time_window_ms").getLong(1800000L);
+        long baseIntervalMs = config.node("base_interval_ms").getLong(20000L);
+        long cacheDurationMs = config.node("cache_duration_ms").getLong(600000L);
+        int cacheMaxSize = config.node("cache_max_size").getInt(30);
         double halfLifeSeconds = config.node("half_life_seconds").getDouble(60.0);
         String youmuName = config.node("youmu_name").getString("YoumuChan");
 
