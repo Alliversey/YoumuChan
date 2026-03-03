@@ -27,6 +27,10 @@ public class HeatControllerListener {
 
     @Subscribe
     public void mentionedName(PlayerChatEvent event) {
+
+        if (heatController.getFuel() > 4.0) {
+            return;
+        }
         // 点名“妖梦”视为高优先交互信号，显著提升热度。
         if (event.getMessage().contains("妖梦")) {
             heatController.addFuel(4.0);
