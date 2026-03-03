@@ -89,7 +89,7 @@ public class YoumuChan {
         long baseIntervalMs = config.node("base_interval_ms").getLong(15000L);
         long cacheDurationMs = config.node("cache_duration_ms").getLong(300000L);
         int cacheMaxSize = config.node("cache_max_size").getInt(100);
-        double halfLifeSeconds = config.node("half_life_seconds").getDouble(30.0);
+        double halfLifeSeconds = config.node("half_life_seconds").getDouble(60.0);
         String youmuName = config.node("youmu_name").getString("YoumuChan");
 
         logger.info("YoumuChan 正在启动");
