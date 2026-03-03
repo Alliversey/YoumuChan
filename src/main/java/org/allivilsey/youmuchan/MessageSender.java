@@ -4,6 +4,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 public class MessageSender {
     private final ProxyServer proxyServer;
@@ -26,12 +27,15 @@ public class MessageSender {
         if (normalized.isEmpty()) {
             return;
         }
-
-        Component component = Component.text("<" + senderName + "> " + normalized);
+        Component component = Component.text("")
+                .append(Component.text(" · ", NamedTextColor.WHITE))
+                .append(Component.text("生存服主世界 ", NamedTextColor.GOLD))
+                .append(Component.text(">> ", NamedTextColor.AQUA))
+                .append(Component.text(senderName, NamedTextColor.WHITE))
+                .append(Component.text(" > ", NamedTextColor.AQUA))
+                .append(Component.text(normalized, NamedTextColor.WHITE));
         for (RegisteredServer server : proxyServer.getAllServers()) {
-            for (Player player : server.getPlayersConnected()) {
-                player.sendMessage(component);
-            }
+            server.sendMessage(component);
         }
 
         InGameInfo info = new InGameInfo(InfoType.CHAT, "you", null, message);
