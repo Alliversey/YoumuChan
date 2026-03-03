@@ -3,4 +3,3 @@ trchat插件兼容
 discordSRV插件兼容
 微调热度系统衰减
 bug:
-妖梦发言不会进入AIContext
