@@ -31,6 +31,7 @@ public class MessageSender {
                 .append(Component.text(" · ", NamedTextColor.WHITE))
                 .append(Component.text("生存服主世界 ", NamedTextColor.GOLD))
                 .append(Component.text(">> ", NamedTextColor.AQUA))
+                .append(Component.text("[吉祥物]", NamedTextColor.AQUA))
                 .append(Component.text(senderName, NamedTextColor.WHITE))
                 .append(Component.text(" > ", NamedTextColor.AQUA))
                 .append(Component.text(normalized, NamedTextColor.WHITE));
