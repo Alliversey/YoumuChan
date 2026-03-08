@@ -49,7 +49,7 @@ public class AIYoumuPromptFormatter {
         // 构建用户提示词
         JsonObject userPrompt = new JsonObject();
 
-        userPrompt.addProperty("language", "简体中文");
+        userPrompt.addProperty("language", "简体中文ONLY");
 
         userPrompt.addProperty("player_list", collector.getOnlinePlayerList());
 
