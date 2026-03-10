@@ -20,6 +20,8 @@ public class AIYoumuPromptFormatter {
 
     public void format(AIContext context) {
 
+        AIContext.EmotionParams params = context.getEmotionParams();
+
         // 构建系统提示词
         String systemPrompt = """
                 You are generating dialogue or monologue as Konpaku Youmu in minecraft server for 天际服.
@@ -43,8 +45,16 @@ public class AIYoumuPromptFormatter {
 
                 You must not assume any other information.
 
-                Your Emotion: %s
-                """.formatted(context.getEmotion());
+                Your Emotion Params:
+                valence=%s, arousal=%s, dominance=%s, sarcasm=%s, politeness=%s, verbosity=%s
+                """.formatted(
+                    params.valence,
+                    params.arousal,
+                    params.dominance,
+                    params.sarcasm,
+                    params.politeness,
+                    params.verbosity
+                );
 
         // 构建用户提示词
         JsonObject userPrompt = new JsonObject();

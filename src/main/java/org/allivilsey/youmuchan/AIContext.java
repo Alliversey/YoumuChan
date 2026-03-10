@@ -5,6 +5,15 @@ import java.util.List;
 
 public class AIContext {
 
+    public static class EmotionParams {
+        public float valence = 0.0f;
+        public float arousal = 0.0f;
+        public float dominance = 0.0f;
+        public float sarcasm = 0.0f;
+        public float politeness = 0.0f;
+        public float verbosity = 0.0f;
+    }
+
     //模型名称
     private String model;
     //模型温度
@@ -23,8 +32,8 @@ public class AIContext {
 
     //模型检测是否为注入攻击（默认否）
     private boolean injectionRisk = false;
-    //模型判断应对情绪
-    private String emotion = "NEUTRAL";
+    //模型判断应对情绪参数
+    private EmotionParams emotionParams = new EmotionParams();
     //模型判断wiki使用需求
     private boolean wikiRequired = false;
 
@@ -69,8 +78,8 @@ public class AIContext {
         return injectionRisk;
     }
 
-    public String getEmotion() {
-        return emotion;
+    public EmotionParams getEmotionParams() {
+        return emotionParams;
     }
 
     public boolean isWikiRequired() {
@@ -102,8 +111,8 @@ public class AIContext {
         this.injectionRisk = injectionRisk;
     }
 
-    public void setEmotion(String emotion) {
-        this.emotion = emotion;
+    public void setEmotionParams(EmotionParams emotionParams) {
+        this.emotionParams = emotionParams;
     }
 
     public void setWikiRequired(boolean wikiRequired) {
