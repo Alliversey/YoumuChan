@@ -31,7 +31,7 @@ public class HeatController {
         recordPlayer(player, timestamp);
         // 根据活跃玩家数量修改 fuel 添加倍率
         int playerCount = countActivePlayers();
-        double factor = playerCount > 0 ? 1.0 / playerCount : 1.0;
+        double factor = playerCount > 0 ? Math.pow(playerCount, -0.7) : 1.0;
         fuel = fuel + f * factor;
     }
 
