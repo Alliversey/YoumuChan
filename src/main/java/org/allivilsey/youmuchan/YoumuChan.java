@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-// 插件入口：加载配置并装配采集、决策、推理与消息发送组件。
-@Plugin(id = "youmuchan", name = "YoumuChan", version = "2.0", authors = { "Allivilsey" })
+// 插件入口：加载配置并装配采集、决策、推理与消息发送组件
+@Plugin(id = "youmuchan", name = "YoumuChan", version = "2.1", authors = { "Allivilsey" })
 public class YoumuChan {
 
     private final ProxyServer proxyServer;
@@ -38,7 +38,7 @@ public class YoumuChan {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) {
-        // 确保插件数据目录可用，用于读取/落盘配置。
+        // 确保插件数据目录可用，用于读取/落盘配置
         try {
             Files.createDirectories(dataDirectory);
         } catch (IOException e) {
@@ -48,7 +48,7 @@ public class YoumuChan {
 
         startPlugin();
 
-        // 注册 /youmu 命令。
+        // 注册 /youmu 命令
         CommandMeta meta = proxyServer.getCommandManager()
                 .metaBuilder("youmu")
                 .build();
@@ -57,7 +57,7 @@ public class YoumuChan {
         logger.info("YoumuChan 已启动");
     }
 
-    // 重载插件：停止调度 -> 注销监听器 -> 重新读取配置并装配组件。
+    // 重载插件：停止调度 -> 注销监听器 -> 重新读取配置并装配组件
     public void reload() {
         logger.info("YoumuChan 正在重载");
 
@@ -76,11 +76,11 @@ public class YoumuChan {
         logger.info("YoumuChan 已重载");
     }
 
-    // 读取配置并装配全部运行时组件。
+    // 读取配置并装配全部运行时组件
     private void startPlugin() {
         ConfigurationNode config = loadConfig();
 
-        // 读取运行参数；缺省值用于首次启动或配置缺失场景。
+        // 读取运行参数；缺省值用于首次启动或配置缺失场景
         String apiKey = config.node("api_key").getString("");
         String apiUrl = config.node("api_url")
                 .getString("https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions");
@@ -98,21 +98,21 @@ public class YoumuChan {
 
         logger.info("YoumuChan 正在启动");
 
-        // 采集层：记录游戏内事件并按时间窗口提供检索。
+        // 采集层：记录游戏内事件并按时间窗口提供检索
         this.collector = new InGameInfoCollector(cacheDurationMs, cacheMaxSize, proxyServer);
 
-        // 专注层：追踪玩家活跃度并决定 AI 关注目标。
+        // 专注层：追踪玩家活跃度并决定 AI 关注目标
         this.focusController = new FocusController();
 
-        // 热度层：根据玩家行为动态调整 AI 调度节奏。
-        HeatController heatController = new HeatController(halfLifeSeconds);
+        // 热度层：根据玩家行为动态调整 AI 调度节奏
+        HeatController heatController = new HeatController(halfLifeSeconds, cacheDurationMs);
 
-        // 注册事件监听器。
+        // 注册事件监听器
         proxyServer.getEventManager().register(this, new InGameInfoListener(collector));
-        proxyServer.getEventManager().register(this, new HeatControllerListener(heatController));
+        proxyServer.getEventManager().register(this, new HeatControllerListener(heatController, focusController));
         proxyServer.getEventManager().register(this, new FocusControllerListener(focusController));
 
-        // 上下文构建层：从采集信息生成模型输入上下文。
+        // 上下文构建层：从采集信息生成模型输入上下文
         AIContextBuilder contextBuilder = new AIContextBuilder(
                 collector,
                 heatController,
@@ -121,7 +121,7 @@ public class YoumuChan {
                 timeWindowMs);
 
         ApiProcessor apiProcessor = new ApiProcessor(apiKey, apiUrl, debugMode, logger, proxyServer);
-        // 推理通道：边界分析模型 + 主对话模型串联调用。
+        // 推理通道：边界分析模型 + 主对话模型串联调用
         KaianPassageway passageway = new KaianPassageway(
                 contextBuilder,
                 new AIBorderPromptFormatter(),
@@ -134,10 +134,10 @@ public class YoumuChan {
 
         mentalStateController = new MentalStateController(proxyServer, debugMode);
 
-        // 直接广播消息到各个子服，并使用配置名称作为消息前缀。
+        // 直接广播消息到各个子服，并使用配置名称作为消息前缀
         MessageSender messageSender = new MessageSender(proxyServer, youmuName, collector);
 
-        // 启动总调度器。
+        // 启动总调度器
         ghostInThePlugin = new GhostInThePlugin(
                 proxyServer,
                 this,
@@ -292,7 +292,7 @@ public class YoumuChan {
         }
     }
 
-    // 返回心智状态控制器，供命令处理器直接调用。
+    // 返回心智状态控制器，供命令处理器直接调用
     public MentalStateController getMentalStateController() {
         return mentalStateController;
     }
@@ -305,7 +305,7 @@ public class YoumuChan {
         return collector;
     }
 
-    // 加载配置文件；不存在时先写入默认模板。
+    // 加载配置文件；不存在时先写入默认模板
     private ConfigurationNode loadConfig() {
         Path configFile = dataDirectory.resolve("config.yml");
 
@@ -324,7 +324,7 @@ public class YoumuChan {
         return loader.createNode();
     }
 
-    // 将类路径下的默认 config.yml 复制到插件数据目录。
+    // 将类路径下的默认 config.yml 复制到插件数据目录
     private void saveDefaultFile(Path file) {
         try (var in = getClass().getResourceAsStream("/config.yml")) {
             if (in == null) {
