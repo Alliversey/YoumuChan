@@ -35,14 +35,6 @@ public class Hanrei {
         this.enabled = false;
     }
 
-    public void sendPlayerPing(Player player) {
-        if (!enabled) {
-            return;
-        }
-        String playerId = player.getUniqueId().toString();
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> sendPayload("ping", playerId));
-    }
-
     private void sendPayload(String type, String payload) {
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(host, port), timeoutMs);

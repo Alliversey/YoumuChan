@@ -18,6 +18,5 @@ public class YoumuListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         // 示例：玩家加入时尝试发送占位消息
         plugin.getLogger().fine("玩家加入: " + event.getPlayer().getName());
-        hanrei.sendPlayerPing(event.getPlayer());
     }
 }
