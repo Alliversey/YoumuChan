@@ -1,4 +1,4 @@
-﻿package org.allivilsey.youmuchan.paper;
+package org.allivilsey.youmuchan.paper;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -14,14 +14,16 @@ public class YoumuChan extends JavaPlugin {
         String host = getConfig().getString("velocity_tcp_host", "127.0.0.1");
         int port = getConfig().getInt("velocity_tcp_port", 55500);
         int timeoutMs = getConfig().getInt("velocity_tcp_timeout_ms", 3000);
+        boolean isDefaultServer = getConfig().getBoolean("is_default_server", false);
+        String serverName = getConfig().getString("server_name", "main");
 
         this.hanrei = new Hanrei(this, host, port, timeoutMs);
         this.hanrei.register();
 
         // 注册监听器
-        Bukkit.getPluginManager().registerEvents(new YoumuListener(this, hanrei), this);
+        Bukkit.getPluginManager().registerEvents(new InGameInfoListener(hanrei, isDefaultServer, serverName), this);
 
-        getLogger().info("YoumuChan 已启动");
+        getLogger().info("YoumuChan 数据探针已启动");
     }
 
     @Override
@@ -29,10 +31,6 @@ public class YoumuChan extends JavaPlugin {
         if (hanrei != null) {
             hanrei.unregister();
         }
-        getLogger().info("YoumuChan 已停止");
-    }
-
-    public Hanrei getVelocityMessenger() {
-        return hanrei;
+        getLogger().info("YoumuChan 数据探针已停止");
     }
 }

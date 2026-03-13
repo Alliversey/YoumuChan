@@ -1,4 +1,4 @@
-﻿package org.allivilsey.youmuchan;
+package org.allivilsey.youmuchan;
 
 import org.slf4j.Logger;
 
@@ -17,14 +17,16 @@ public class Hanrei {
     private final Logger logger;
     private final String host;
     private final int port;
+    private final HanreiMessageParser messageParser;
     private ServerSocket serverSocket;
     private Thread acceptThread;
     private ExecutorService clientPool;
 
-    public Hanrei(Logger logger, String host, int port) {
+    public Hanrei(Logger logger, String host, int port, InGameInfoCollector collector) {
         this.logger = logger;
         this.host = host;
         this.port = port;
+        this.messageParser = new HanreiMessageParser(collector);
     }
 
     public synchronized void startHanrei() {
@@ -98,12 +100,11 @@ public class Hanrei {
             while (true) {
                 try {
                     String type = in.readUTF();
-                    if ("ping".equalsIgnoreCase(type)) {
-                        String playerId = in.readUTF();
-                        logger.info("收到 Paper ping: {}", playerId);
+                    String payload = in.readUTF();
+                    if (HanreiMessageParser.MESSAGE_TYPE.equalsIgnoreCase(type)) {
+                        messageParser.parseAndCollect(payload);
                     } else {
                         logger.info("收到未知 TCP 消息类型: {}", type);
-                        break;
                     }
                 } catch (EOFException eof) {
                     break;

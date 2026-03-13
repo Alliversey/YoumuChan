@@ -11,3 +11,10 @@ velocity_tcp_port: 55500
 
 # TCP 连接超时，单位：毫秒
 velocity_tcp_timeout_ms: 3000
+
+# 子服相关配置
+# 是否为默认服务器
+is_default_server: false
+
+# 子服名称
+server_name: "main"

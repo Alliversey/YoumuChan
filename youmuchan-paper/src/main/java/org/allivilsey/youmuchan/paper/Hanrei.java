@@ -1,7 +1,5 @@
-﻿package org.allivilsey.youmuchan.paper;
+package org.allivilsey.youmuchan.paper;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.io.DataOutputStream;
@@ -35,12 +33,22 @@ public class Hanrei {
         this.enabled = false;
     }
 
-    private void sendPayload(String type, String payload) {
+    public void sendInGameInfo(InGameInfo info) {
+        if (!enabled || info == null) {
+            return;
+        }
+
+        String payload = HanreiMessageFormatter.format(info);
+        if (payload == null) {
+            return;
+        }
+
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(host, port), timeoutMs);
+
             try (DataOutputStream out = new DataOutputStream(socket.getOutputStream())) {
                 // 协议：UTF 字符串类型 + UTF 字符串载荷
-                out.writeUTF(type);
+                out.writeUTF(HanreiMessageFormatter.MESSAGE_TYPE);
                 out.writeUTF(payload);
                 out.flush();
             }

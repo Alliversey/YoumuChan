@@ -1,4 +1,4 @@
-﻿package org.allivilsey.youmuchan;
+package org.allivilsey.youmuchan;
 
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandMeta;
@@ -115,12 +115,12 @@ public class YoumuChan {
 
         logger.info("YoumuChan 正在启动");
 
-        // 启动 Paper -> Velocity TCP 接收器
-        hanrei = new Hanrei(logger, tcpHost, tcpPort);
-        hanrei.startHanrei();
-
         // 采集层：记录游戏内事件并按时间窗口提供检索
         this.collector = new InGameInfoCollector(cacheDurationMs, cacheMaxSize, proxyServer);
+
+        // 启动 Paper -> Velocity TCP 接收器
+        hanrei = new Hanrei(logger, tcpHost, tcpPort, collector);
+        hanrei.startHanrei();
 
         // 专注层：追踪玩家活跃度并决定 AI 关注目标
         this.focusController = new FocusController();

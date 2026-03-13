@@ -1,4 +1,4 @@
-package org.allivilsey.youmuchan;
+package org.allivilsey.youmuchan.paper;
 
 public class InGameInfo {
 
@@ -10,16 +10,12 @@ public class InGameInfo {
 
     private final String content;
 
-    private final Long timestamp;
-
     //聊天消息数据对象
     public InGameInfo(InfoType type, String playerName, String serverName, String content) {
         this.type = type;
         this.playerName = playerName;
         this.serverName = serverName;
         this.content = content;
-        // 时间戳在这里标记
-        this.timestamp = System.currentTimeMillis();
     }
 
     //获取方法数据类型
@@ -37,9 +33,5 @@ public class InGameInfo {
     //获取数据内容
     public String getContent() {
         return content;
-    }
-    //获取时间戳
-    public Long getTimestamp() {
-        return timestamp;
     }
 }
