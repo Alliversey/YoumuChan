@@ -1,9 +1,10 @@
-package org.allivilsey.youmuchan;
+﻿package org.allivilsey.youmuchan;
 
 import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -28,6 +29,7 @@ public class YoumuChan {
     private DebugInfo debugInfo;
     private InGameInfoCollector collector;
     private FocusController focusController;
+    private Hanrei hanrei;
 
     @Inject
     public YoumuChan(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataDirectory) {
@@ -57,6 +59,14 @@ public class YoumuChan {
         logger.info("YoumuChan 已启动");
     }
 
+    @Subscribe
+    public void onProxyShutdown(ProxyShutdownEvent event) {
+        if (hanrei != null) {
+            hanrei.stop();
+            hanrei = null;
+        }
+    }
+
     // 重载插件：停止调度 -> 注销监听器 -> 重新读取配置并装配组件
     public void reload() {
         logger.info("YoumuChan 正在重载");
@@ -67,6 +77,11 @@ public class YoumuChan {
 
         if (ghostInThePlugin != null) {
             ghostInThePlugin.youmuStop();
+        }
+
+        if (hanrei != null) {
+            hanrei.stop();
+            hanrei = null;
         }
 
         proxyServer.getEventManager().unregisterListeners(this);
@@ -95,8 +110,14 @@ public class YoumuChan {
         int cacheMaxSize = config.node("cache_max_size").getInt(30);
         double halfLifeSeconds = config.node("half_life_seconds").getDouble(60.0);
         String youmuName = config.node("youmu_name").getString("YoumuChan");
+        String tcpHost = config.node("tcp_listen_host").getString("127.0.0.1");
+        int tcpPort = config.node("tcp_listen_port").getInt(55500);
 
         logger.info("YoumuChan 正在启动");
+
+        // 启动 Paper -> Velocity TCP 接收器
+        hanrei = new Hanrei(logger, tcpHost, tcpPort);
+        hanrei.start();
 
         // 采集层：记录游戏内事件并按时间窗口提供检索
         this.collector = new InGameInfoCollector(cacheDurationMs, cacheMaxSize, proxyServer);

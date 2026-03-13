@@ -1,0 +1,13 @@
+﻿# ==========================================
+# YoumuChan Paper 配置文件
+# ==========================================
+
+# Velocity TCP 连接地址
+# 跨机器部署时可改为 Velocity 所在主机 IP
+velocity_tcp_host: "127.0.0.1"
+
+# Velocity TCP 监听端口
+velocity_tcp_port: 55500
+
+# TCP 连接超时，单位：毫秒
+velocity_tcp_timeout_ms: 3000

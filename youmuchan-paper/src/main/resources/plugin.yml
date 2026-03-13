@@ -1,5 +1,5 @@
 name: YoumuChan
 version: ${project.version}
-main: org.allivilsey.youmuchan.paper.YoumuChanPaper
+main: org.allivilsey.youmuchan.paper.YoumuChan
 api-version: '1.20'
 author: Allivilsey
