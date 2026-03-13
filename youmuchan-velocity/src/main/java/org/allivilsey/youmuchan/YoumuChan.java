@@ -62,7 +62,7 @@ public class YoumuChan {
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) {
         if (hanrei != null) {
-            hanrei.stop();
+            hanrei.stopHanrei();
             hanrei = null;
         }
     }
@@ -80,7 +80,7 @@ public class YoumuChan {
         }
 
         if (hanrei != null) {
-            hanrei.stop();
+            hanrei.stopHanrei();
             hanrei = null;
         }
 
@@ -117,7 +117,7 @@ public class YoumuChan {
 
         // 启动 Paper -> Velocity TCP 接收器
         hanrei = new Hanrei(logger, tcpHost, tcpPort);
-        hanrei.start();
+        hanrei.startHanrei();
 
         // 采集层：记录游戏内事件并按时间窗口提供检索
         this.collector = new InGameInfoCollector(cacheDurationMs, cacheMaxSize, proxyServer);

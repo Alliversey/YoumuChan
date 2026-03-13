@@ -45,7 +45,7 @@ public class Hanrei {
                 out.flush();
             }
         } catch (IOException e) {
-            plugin.getLogger().warning("TCP 发送到 Velocity 失败: " + e.getMessage());
+            plugin.getLogger().warning("发送失败: " + e.getMessage());
         }
     }
 }

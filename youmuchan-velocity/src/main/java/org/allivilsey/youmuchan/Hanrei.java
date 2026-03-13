@@ -27,7 +27,7 @@ public class Hanrei {
         this.port = port;
     }
 
-    public synchronized void start() {
+    public synchronized void startHanrei() {
         if (serverSocket != null) {
             return;
         }
@@ -49,11 +49,11 @@ public class Hanrei {
             logger.info("TCP 接收器已启动: {}:{}", host, port);
         } catch (IOException e) {
             logger.error("TCP 接收器启动失败", e);
-            stop();
+            stopHanrei();
         }
     }
 
-    public synchronized void stop() {
+    public synchronized void stopHanrei() {
         if (serverSocket == null) {
             return;
         }
