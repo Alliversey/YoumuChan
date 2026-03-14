@@ -10,7 +10,7 @@ public class InGameInfo {
 
     private final String content;
 
-    private final Long timestamp;
+    private final long timestamp;
 
     //聊天消息数据对象
     public InGameInfo(InfoType type, String playerName, String serverName, String content) {
@@ -39,7 +39,8 @@ public class InGameInfo {
         return content;
     }
     //获取时间戳
-    public Long getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 }
+

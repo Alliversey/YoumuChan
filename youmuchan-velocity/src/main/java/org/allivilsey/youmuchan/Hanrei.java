@@ -17,16 +17,16 @@ public class Hanrei {
     private final Logger logger;
     private final String host;
     private final int port;
-    private final HanreiMessageParser messageParser;
+    private final HanreiParser hanreiParser;
     private ServerSocket serverSocket;
     private Thread acceptThread;
     private ExecutorService clientPool;
 
-    public Hanrei(Logger logger, String host, int port, InGameInfoCollector collector) {
+    public Hanrei(Logger logger, String host, int port, InGameInfoCollector collector, HeatController heatController, FocusController focusController) {
         this.logger = logger;
         this.host = host;
         this.port = port;
-        this.messageParser = new HanreiMessageParser(collector);
+        this.hanreiParser = new HanreiParser(collector, heatController, focusController);
     }
 
     public synchronized void startHanrei() {
@@ -101,10 +101,11 @@ public class Hanrei {
                 try {
                     String type = in.readUTF();
                     String payload = in.readUTF();
-                    if (HanreiMessageParser.MESSAGE_TYPE.equalsIgnoreCase(type)) {
-                        messageParser.parseAndCollect(payload);
-                    } else {
-                        logger.info("收到未知 TCP 消息类型: {}", type);
+                    switch (type) {
+                        case "info" -> hanreiParser.parseInfo(payload);
+                        case "fuel" -> hanreiParser.parseFuel(payload);
+                        case "focus" -> hanreiParser.parseFocus(payload);
+                        default -> logger.info("收到未知 TCP 消息类型: {}", type);
                     }
                 } catch (EOFException eof) {
                     break;

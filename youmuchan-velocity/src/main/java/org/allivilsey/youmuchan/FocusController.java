@@ -28,7 +28,7 @@ public class FocusController {
     private final double epsilon = 0.01; // 清理阈值
 
     // 外部调用：增加 focus
-    public void addFocus(String playerName, double fuel) {
+    public void addFocus(String playerName, double focus) {
         long now = System.currentTimeMillis();
         FocusedPlayer player = ledger.get(playerName);
 
@@ -38,7 +38,7 @@ public class FocusController {
         }
 
         decayPlayer(player, now);
-        player.value += fuel;
+        player.value += focus;
     }
 
     // 获取当前专注玩家

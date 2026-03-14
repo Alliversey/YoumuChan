@@ -118,15 +118,15 @@ public class YoumuChan {
         // 采集层：记录游戏内事件并按时间窗口提供检索
         this.collector = new InGameInfoCollector(cacheDurationMs, cacheMaxSize, proxyServer);
 
+        // 热度层：根据玩家行为动态调整 AI 调度节奏
+        HeatController heatController = new HeatController(halfLifeSeconds, cacheDurationMs);
+
         // 启动 Paper -> Velocity TCP 接收器
-        hanrei = new Hanrei(logger, tcpHost, tcpPort, collector);
+        hanrei = new Hanrei(logger, tcpHost, tcpPort, collector, heatController, focusController);
         hanrei.startHanrei();
 
         // 专注层：追踪玩家活跃度并决定 AI 关注目标
         this.focusController = new FocusController();
-
-        // 热度层：根据玩家行为动态调整 AI 调度节奏
-        HeatController heatController = new HeatController(halfLifeSeconds, cacheDurationMs);
 
         // 注册事件监听器
         proxyServer.getEventManager().register(this, new InGameInfoListener(collector));
