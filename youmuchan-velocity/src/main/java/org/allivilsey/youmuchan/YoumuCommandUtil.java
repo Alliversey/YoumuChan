@@ -97,10 +97,12 @@ public final class YoumuCommandUtil {
         String[] args = invocation.arguments();
         CommandSource source = invocation.source();
         LuckPerms luckPerms = plugin.getLuckPerms();
+
         if (luckPerms == null) {
             source.sendMessage(Component.text("LuckPerms 未就绪，无法切换权限。", NamedTextColor.RED));
             return;
         }
+
         if (args.length >= 2) {
             if (!source.hasPermission("youmu.muteplayer")) {
                 source.sendMessage(Component.text("没有权限执行此命令。", NamedTextColor.RED));
@@ -120,10 +122,12 @@ public final class YoumuCommandUtil {
             });
             return;
         }
+
         if (!(source instanceof Player player)) {
             source.sendMessage(Component.text("只有玩家可以使用此命令。", NamedTextColor.RED));
             return;
         }
+
         toggleVisibility(plugin, luckPerms, source, player.getUniqueId(), player.getUsername(), true);
     }
 
