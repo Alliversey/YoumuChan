@@ -26,7 +26,7 @@ public class HeatController {
     }
 
     // 增加 fuel 前先做一次衰减，保证不同事件在统一时间基准下叠加
-    public synchronized void addFuel(double f, String player, double timestamp) {
+    public synchronized void addFuel(double f, String player, long timestamp) {
         decay();
         recordPlayer(player, timestamp);
         // 根据活跃玩家数量修改 fuel 添加倍率
@@ -64,14 +64,14 @@ public class HeatController {
     }
 
     // 记录玩家触发事件，并清理超时记录
-    private void recordPlayer(String player, double timestamp) {
+    private void recordPlayer(String player, long timestamp) {
         recentPlayers.add(new PlayerRecord(player, timestamp));
         purgeExpired(timestamp);
     }
 
     // 根据缓存时长清理过久的玩家记录
-    private void purgeExpired(double nowTimestamp) {
-        double cutoff = nowTimestamp - cacheDurationMs;
+    private void purgeExpired(long nowTimestamp) {
+        long cutoff = nowTimestamp - cacheDurationMs;
         recentPlayers.removeIf(record -> record.timestamp() < cutoff);
     }
 
@@ -85,6 +85,7 @@ public class HeatController {
     }
 
     // 保存玩家与触发时间
-    private record PlayerRecord(String player, double timestamp) {
+    private record PlayerRecord(String player, long timestamp) {
     }
 }
+

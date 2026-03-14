@@ -19,7 +19,7 @@ public class HeatControllerListener {
     public void onChat(PlayerChatEvent event) {
         // 常规聊天对 heat 的基础增益
         String player = event.getPlayer().getUsername();
-        double timestamp = System.currentTimeMillis();
+        long timestamp = System.currentTimeMillis();
         // 专注玩家可以获得更高的 fuel 增量
         if (player.equalsIgnoreCase(focusController.getCurrentFocus())) {
             heatController.addFuel(2.0, player, timestamp);
@@ -32,7 +32,7 @@ public class HeatControllerListener {
     public void playerLogin(PostLoginEvent event) {
         // 玩家登录时显著加速聊天，有概率直接生成发言
         String player = event.getPlayer().getUsername();
-        double timestamp = System.currentTimeMillis();
+        long timestamp = System.currentTimeMillis();
         heatController.addFuel(2.0, player, timestamp);
     }
 
@@ -45,8 +45,9 @@ public class HeatControllerListener {
         // 点名“妖梦”视为高优先交互信号，显著提升热度
         if (event.getMessage().contains("妖梦")) {
             String player = event.getPlayer().getUsername();
-            double timestamp = System.currentTimeMillis();
+            long timestamp = System.currentTimeMillis();
             heatController.addFuel(3.0, player, timestamp);
         }
     }
 }
+
