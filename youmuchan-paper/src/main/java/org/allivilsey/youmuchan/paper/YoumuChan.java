@@ -22,6 +22,7 @@ public class YoumuChan extends JavaPlugin {
 
         // 注册监听器
         Bukkit.getPluginManager().registerEvents(new InGameInfoListener(hanrei, isDefaultServer, serverName), this);
+        Bukkit.getPluginManager().registerEvents(new HeatListener(hanrei, isDefaultServer), this);
 
         getLogger().info("YoumuChan 数据探针已启动");
     }
