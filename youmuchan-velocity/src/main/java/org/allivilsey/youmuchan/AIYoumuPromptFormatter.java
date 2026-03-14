@@ -47,6 +47,8 @@ public class AIYoumuPromptFormatter {
 
                 Your Emotion Params:
                 valence=%s, arousal=%s, dominance=%s, sarcasm=%s, politeness=%s, verbosity=%s
+                Each parameter is a float.
+                Constraint: -1.0 <= value <= 1.0
                 """.formatted(
                     params.valence,
                     params.arousal,
