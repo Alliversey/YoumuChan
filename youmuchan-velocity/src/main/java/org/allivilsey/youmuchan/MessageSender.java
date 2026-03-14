@@ -2,22 +2,26 @@ package org.allivilsey.youmuchan;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.util.Tristate;
 
 public class MessageSender {
     private final ProxyServer proxyServer;
     private final String senderName;
     private final InGameInfoCollector collector;
+    private final LuckPerms luckPerms;
 
-    public MessageSender(ProxyServer proxyServer, String senderName, InGameInfoCollector collector) {
+    public MessageSender(ProxyServer proxyServer, String senderName, InGameInfoCollector collector, LuckPerms luckPerms) {
         this.proxyServer = proxyServer;
         this.senderName = senderName;
         this.collector = collector;
+        this.luckPerms = luckPerms;
     }
 
-    //向全子服广播
+    //向所有玩家发送
     public void send(String message) {
         if (message == null) {
             return;
@@ -35,13 +39,27 @@ public class MessageSender {
                 .append(Component.text(senderName, NamedTextColor.WHITE))
                 .append(Component.text(" > ", NamedTextColor.AQUA))
                 .append(Component.text(normalized, NamedTextColor.WHITE));
-        for (RegisteredServer server : proxyServer.getAllServers()) {
-            server.sendMessage(component);
+        for (Player player : proxyServer.getAllPlayers()) {
+            if (canReceiveMessage(player)) {
+                player.sendMessage(component);
+            }
         }
 
         InGameInfo info = new InGameInfo(InfoType.CHAT, "you", null, message);
         collector.addInfo(info);
 
         proxyServer.getConsoleCommandSource().sendMessage(component);
+    }
+
+    private boolean canReceiveMessage(Player player) {
+        if (luckPerms == null) {
+            return true;
+        }
+        User user = luckPerms.getUserManager().getUser(player.getUniqueId());
+        if (user == null) {
+            return true;
+        }
+        Tristate state = user.getCachedData().getPermissionData().checkPermission("youmu.visible");
+        return state != Tristate.FALSE;
     }
 }

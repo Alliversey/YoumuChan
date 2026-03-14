@@ -5,9 +5,12 @@ import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
+import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
@@ -17,12 +20,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 // 插件入口：加载配置并装配采集、决策、推理与消息发送组件
-@Plugin(id = "youmuchan", name = "YoumuChan", version = "2.1", authors = { "Allivilsey" })
+@Plugin(id = "youmuchan", name = "YoumuChan", version = "2.1", authors = { "Allivilsey" }, dependencies = {
+        @Dependency(id = "luckperms")
+})
 public class YoumuChan {
 
     private final ProxyServer proxyServer;
     private final Logger logger;
     private final Path dataDirectory;
+    private LuckPerms luckPerms;
 
     private GhostInThePlugin ghostInThePlugin;
     private MentalStateController mentalStateController;
@@ -45,6 +51,13 @@ public class YoumuChan {
             Files.createDirectories(dataDirectory);
         } catch (IOException e) {
             logger.error("无法创建插件数据目录", e);
+            return;
+        }
+
+        try {
+            luckPerms = LuckPermsProvider.get();
+        } catch (IllegalStateException e) {
+            logger.error("LuckPerms 未加载，无法初始化权限控制", e);
             return;
         }
 
@@ -85,6 +98,13 @@ public class YoumuChan {
         }
 
         proxyServer.getEventManager().unregisterListeners(this);
+
+        try {
+            luckPerms = LuckPermsProvider.get();
+        } catch (IllegalStateException e) {
+            logger.error("LuckPerms 未加载，无法初始化权限控制", e);
+            return;
+        }
 
         startPlugin();
 
@@ -155,8 +175,8 @@ public class YoumuChan {
 
         mentalStateController = new MentalStateController(proxyServer, debugMode);
 
-        // 直接广播消息到各个子服，并使用配置名称作为消息前缀
-        MessageSender messageSender = new MessageSender(proxyServer, youmuName, collector);
+        // 直接向所有玩家发送消息，并使用配置名称作为消息前缀
+        MessageSender messageSender = new MessageSender(proxyServer, youmuName, collector, luckPerms);
 
         // 启动总调度器
         ghostInThePlugin = new GhostInThePlugin(
@@ -324,6 +344,18 @@ public class YoumuChan {
 
     public InGameInfoCollector getInGameInfoCollector() {
         return collector;
+    }
+
+    public LuckPerms getLuckPerms() {
+        return luckPerms;
+    }
+
+    public ProxyServer getProxyServer() {
+        return proxyServer;
+    }
+
+    public Logger getLogger() {
+        return logger;
     }
 
     // 加载配置文件；不存在时先写入默认模板
