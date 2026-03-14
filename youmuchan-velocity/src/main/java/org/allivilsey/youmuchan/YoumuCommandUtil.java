@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
 
 public final class YoumuCommandUtil {
 
-    private static final String VISIBILITY_PERMISSION = "youmu.visible";
+
 
     private YoumuCommandUtil() {
     }
@@ -143,6 +143,9 @@ public final class YoumuCommandUtil {
     }
 
     private static void toggleVisibility(YoumuChan plugin, LuckPerms luckPerms, CommandSource source, UUID uuid, String displayName, boolean self) {
+
+        String VISIBILITY_PERMISSION = "youmu.visible";
+
         luckPerms.getUserManager().loadUser(uuid).thenAccept(user -> {
             if (user == null) {
                 source.sendMessage(Component.text("玩家数据加载失败。", NamedTextColor.RED));
