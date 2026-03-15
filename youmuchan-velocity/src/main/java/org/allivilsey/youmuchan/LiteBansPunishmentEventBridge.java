@@ -13,6 +13,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -22,7 +25,7 @@ public class LiteBansPunishmentEventBridge {
     private final ProxyServer proxyServer;
     private final Logger logger;
     private final Events.Listener listener;
-    private volatile String historyTableName;
+    private volatile List<String> playerNameTableNames;
     private boolean registered;
 
     public LiteBansPunishmentEventBridge(ProxyServer proxyServer, Logger logger) {
@@ -31,12 +34,12 @@ public class LiteBansPunishmentEventBridge {
         this.listener = new Events.Listener() {
             @Override
             public void entryAdded(Entry entry) {
-                firePunishmentEvent(entry);
+                firePunishmentEvent(entry, false);
             }
 
             @Override
             public void entryRemoved(Entry entry) {
-                firePunishmentEvent(entry);
+                firePunishmentEvent(entry, true);
             }
         };
     }
@@ -71,25 +74,27 @@ public class LiteBansPunishmentEventBridge {
         }
     }
 
-    private void firePunishmentEvent(Entry entry) {
+    private void firePunishmentEvent(Entry entry, boolean removed) {
         String punishedPlayerUuid = trimToNull(entry.getUuid());
-        String executorUuid = trimToNull(entry.getExecutorUUID());
-        Instant expireTime = resolveExpireTime(entry);
+        String operatorUuid = removed ? trimToNull(entry.getRemovedByUUID()) : trimToNull(entry.getExecutorUUID());
+        String operatorName = removed ? trimToNull(entry.getRemovedByName()) : trimToNull(entry.getExecutorName());
+        Instant expireTime = resolveExpireTime(entry, removed);
         String punishedPlayerName = resolvePlayerName(punishedPlayerUuid);
-        String executorName = resolveDisplayName(trimToNull(entry.getExecutorName()), executorUuid);
+        String executorName = resolveDisplayName(operatorName, operatorUuid);
 
         LiteBansPunishmentEvent event = new LiteBansPunishmentEvent(
                 entry.getType(),
                 punishedPlayerName,
                 trimToNull(entry.getReason()),
                 executorName,
-                expireTime);
+                expireTime,
+                removed);
 
         proxyServer.getEventManager().fire(event);
     }
 
-    private Instant resolveExpireTime(Entry entry) {
-        if (entry.isPermanent()) {
+    private Instant resolveExpireTime(Entry entry, boolean removed) {
+        if (removed || entry.isPermanent()) {
             return null;
         }
 
@@ -115,9 +120,9 @@ public class LiteBansPunishmentEventBridge {
             }
         }
 
-        String historyPlayerName = resolvePlayerNameFromHistory(uuidText);
-        if (historyPlayerName != null) {
-            return historyPlayerName;
+        String storedPlayerName = resolvePlayerNameFromTables(uuidText);
+        if (storedPlayerName != null) {
+            return storedPlayerName;
         }
 
         try {
@@ -141,35 +146,39 @@ public class LiteBansPunishmentEventBridge {
         return null;
     }
 
-    private String resolvePlayerNameFromHistory(String uuidText) {
-        String historyTable = findHistoryTableName();
-        if (historyTable == null) {
+    private String resolvePlayerNameFromTables(String uuidText) {
+        List<String> tableNames = findPlayerNameTables();
+        if (tableNames.isEmpty()) {
             return null;
         }
 
-        try {
-            String historyPlayerName = queryPlayerName(historyTable, uuidText);
-            if (historyPlayerName != null) {
-                return historyPlayerName;
-            }
+        UUID uuid = parseUuid(uuidText);
+        String canonicalUuid = uuid == null ? null : uuid.toString();
 
-            UUID uuid = parseUuid(uuidText);
-            if (uuid != null) {
-                String canonicalUuid = uuid.toString();
-                if (!canonicalUuid.equalsIgnoreCase(uuidText)) {
-                    return queryPlayerName(historyTable, canonicalUuid);
+        for (String tableName : tableNames) {
+            try {
+                String resolvedName = queryPlayerName(tableName, uuidText);
+                if (resolvedName != null) {
+                    return resolvedName;
                 }
+
+                if (canonicalUuid != null && !canonicalUuid.equalsIgnoreCase(uuidText)) {
+                    resolvedName = queryPlayerName(tableName, canonicalUuid);
+                    if (resolvedName != null) {
+                        return resolvedName;
+                    }
+                }
+            } catch (SQLException | MissingImplementationException ex) {
+                logger.debug("从 LiteBans 表 {} 查询玩家名失败", tableName, ex);
             }
-        } catch (SQLException | MissingImplementationException ex) {
-            logger.debug("通过 LiteBans 历史记录查询玩家名失败", ex);
         }
 
         return null;
     }
 
-    private String queryPlayerName(String historyTable, String uuidText) throws SQLException {
+    private String queryPlayerName(String tableName, String uuidText) throws SQLException {
         try (PreparedStatement statement = Database.get().prepareStatement(
-                "SELECT name FROM " + historyTable + " WHERE uuid = ? ORDER BY id DESC LIMIT 1")) {
+                "SELECT name FROM " + tableName + " WHERE uuid = ? ORDER BY id DESC LIMIT 1")) {
             statement.setString(1, uuidText);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (!resultSet.next()) {
@@ -180,39 +189,66 @@ public class LiteBansPunishmentEventBridge {
         }
     }
 
-    private String findHistoryTableName() {
-        String cachedTableName = historyTableName;
-        if (cachedTableName != null) {
-            return cachedTableName;
+    private List<String> findPlayerNameTables() {
+        List<String> cachedTableNames = playerNameTableNames;
+        if (cachedTableNames != null) {
+            return cachedTableNames;
         }
 
+        List<String> discoveredTableNames = new ArrayList<>();
         try (PreparedStatement statement = Database.get().prepareStatement("SELECT 1")) {
             Connection connection = statement.getConnection();
             try (ResultSet tables = connection.getMetaData().getTables(null, null, "%", new String[]{"TABLE"})) {
                 while (tables.next()) {
                     String tableName = trimToNull(tables.getString("TABLE_NAME"));
-                    if (tableName == null || !tableName.toLowerCase(Locale.ROOT).endsWith("history")) {
+                    if (tableName == null) {
                         continue;
                     }
-                    if (!isLiteBansHistoryTable(connection, tableName)) {
+                    if (!isLiteBansPlayerNameTable(connection, tableName)) {
                         continue;
                     }
-
-                    historyTableName = tableName;
-                    return tableName;
+                    discoveredTableNames.add(tableName);
                 }
             }
         } catch (SQLException | MissingImplementationException ex) {
-            logger.debug("定位 LiteBans 历史表失败", ex);
+            logger.debug("定位 LiteBans 玩家名表失败", ex);
         }
 
-        return null;
+        discoveredTableNames.sort(Comparator
+                .comparingInt(this::playerNameTablePriority)
+                .thenComparing(String::compareToIgnoreCase));
+        playerNameTableNames = List.copyOf(discoveredTableNames);
+        return playerNameTableNames;
     }
 
-    private boolean isLiteBansHistoryTable(Connection connection, String tableName) throws SQLException {
-        return hasColumn(connection, tableName, "id")
-                && hasColumn(connection, tableName, "uuid")
-                && hasColumn(connection, tableName, "name");
+    private boolean isLiteBansPlayerNameTable(Connection connection, String tableName) throws SQLException {
+        if (!hasColumn(connection, tableName, "id")
+                || !hasColumn(connection, tableName, "uuid")
+                || !hasColumn(connection, tableName, "name")) {
+            return false;
+        }
+
+        String normalizedTableName = tableName.toLowerCase(Locale.ROOT);
+        return normalizedTableName.contains("litebans")
+                || normalizedTableName.contains("history")
+                || normalizedTableName.contains("ban")
+                || normalizedTableName.contains("mute")
+                || normalizedTableName.contains("warn")
+                || normalizedTableName.contains("kick");
+    }
+
+    private int playerNameTablePriority(String tableName) {
+        String normalizedTableName = tableName.toLowerCase(Locale.ROOT);
+        if (normalizedTableName.contains("history")) {
+            return 0;
+        }
+        if (normalizedTableName.contains("ban")
+                || normalizedTableName.contains("mute")
+                || normalizedTableName.contains("warn")
+                || normalizedTableName.contains("kick")) {
+            return 1;
+        }
+        return 2;
     }
 
     private boolean hasColumn(Connection connection, String tableName, String columnName) throws SQLException {

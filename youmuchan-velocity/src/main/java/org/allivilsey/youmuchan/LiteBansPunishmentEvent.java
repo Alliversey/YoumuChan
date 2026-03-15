@@ -14,18 +14,21 @@ public class LiteBansPunishmentEvent {
     private final String reason;
     private final String executorName;
     private final Instant expireTime;
+    private final boolean removed;
 
     public LiteBansPunishmentEvent(
             String punishmentType,
             String punishedPlayerName,
             String reason,
             String executorName,
-            Instant expireTime) {
+            Instant expireTime,
+            boolean removed) {
         this.punishmentType = normalizeType(punishmentType);
         this.punishedPlayerName = punishedPlayerName;
         this.reason = reason == null || reason.isBlank() ? "未提供原因" : reason;
         this.executorName = executorName;
         this.expireTime = expireTime;
+        this.removed = removed;
     }
 
     /**
@@ -48,14 +51,18 @@ public class LiteBansPunishmentEvent {
         return executorName;
     }
 
+    public boolean isRemoved() {
+        return removed;
+    }
+
     /**
      * 获取完整惩罚消息。
      */
     public String getPunishmentInfo() {
         String player = valueOrDefault(punishedPlayerName, "玩家");
         String operator = valueOrDefault(executorName, "控制台");
-        String action = resolveActionText(punishmentType);
-        String durationText = resolveDurationText(expireTime);
+        String action = resolveActionText(punishmentType, removed);
+        String durationText = removed ? "" : resolveDurationText(expireTime);
         return player + "由于" + reason + "被" + operator + action + durationText;
     }
 
@@ -66,14 +73,23 @@ public class LiteBansPunishmentEvent {
         return type.toUpperCase(Locale.ROOT);
     }
 
-    private String resolveActionText(String type) {
-        return switch (type) {
-            case "BAN", "IPBAN", "TEMPBAN" -> "封禁";
-            case "MUTE", "TEMPMUTE" -> "禁言";
-            case "KICK" -> "踢出";
-            case "WARN" -> "警告";
-            default -> "惩罚";
-        };
+    private String resolveActionText(String type, boolean removed) {
+        if (removed) {
+            return switch (type) {
+                case "BAN", "IPBAN", "TEMPBAN" -> "解除封禁";
+                case "MUTE", "TEMPMUTE" -> "解除禁言";
+                case "WARN" -> "撤销警告";
+                default -> "解除惩罚";
+            };
+        } else {
+            return switch (type) {
+                case "BAN", "IPBAN", "TEMPBAN" -> "封禁";
+                case "MUTE", "TEMPMUTE" -> "禁言";
+                case "KICK" -> "踢出";
+                case "WARN" -> "警告";
+                default -> "惩罚";
+            };
+        }
     }
 
     private String resolveDurationText(@Nullable Instant endTime) {
