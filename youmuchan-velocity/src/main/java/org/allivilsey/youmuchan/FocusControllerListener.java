@@ -27,4 +27,9 @@ public class FocusControllerListener {
             focusController.addFocus(event.getPlayer().getUsername(), 3.0);
         }
     }
+
+    @Subscribe
+    public void onPlayerPunishment(LiteBansPunishmentEvent event) {
+        focusController.addFocus(event.getExecutorName(), 6.0);
+    }
 }

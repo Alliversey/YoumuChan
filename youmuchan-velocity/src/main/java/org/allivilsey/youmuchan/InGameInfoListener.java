@@ -56,4 +56,18 @@ public class InGameInfoListener {
 
         inGameInfoCollector.addInfo(info);
     }
+
+    @Subscribe
+    public void onPlayerPunished(LiteBansPunishmentEvent event) {
+        String playerName = event.getPunishedPlayerName();
+
+        InGameInfo info = new InGameInfo(
+                InfoType.PUNISH_EVENT,
+                playerName,
+                null,
+                event.getPunishmentInfo()
+        );
+
+        inGameInfoCollector.addInfo(info);
+    }
 }
