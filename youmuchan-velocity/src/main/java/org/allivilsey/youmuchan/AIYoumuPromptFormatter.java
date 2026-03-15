@@ -2,6 +2,7 @@ package org.allivilsey.youmuchan;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -76,10 +77,17 @@ public class AIYoumuPromptFormatter {
         context.getFilteredInfos().forEach(info -> {
             JsonObject line = new JsonObject();
             line.addProperty("type", info.getInfoType().name());
-            if (info.getPlayerName().equalsIgnoreCase(focusController.getCurrentFocus())) {
-                line.addProperty("player_name", "[Focused Player]" + info.getPlayerName());
+
+            String playerName = info.getPlayerName();
+            String focusedPlayer = focusController.getCurrentFocus();
+            if (playerName == null || playerName.isBlank()) {
+                playerName = "未知玩家";
+            }
+
+            if (focusedPlayer != null && playerName.equalsIgnoreCase(focusedPlayer)) {
+                line.addProperty("player_name", "[Focused Player]" + playerName);
             } else {
-                line.addProperty("player_name", info.getPlayerName());
+                line.addProperty("player_name", playerName);
             }
             line.addProperty("server_name", info.getServerName());
             line.addProperty("content", info.getContent());

@@ -60,6 +60,9 @@ public class InGameInfoListener {
     @Subscribe
     public void onPlayerPunished(LiteBansPunishmentEvent event) {
         String playerName = event.getPunishedPlayerName();
+        if (playerName == null || playerName.isBlank()) {
+            playerName = "未知玩家";
+        }
 
         InGameInfo info = new InGameInfo(
                 InfoType.PUNISH_EVENT,

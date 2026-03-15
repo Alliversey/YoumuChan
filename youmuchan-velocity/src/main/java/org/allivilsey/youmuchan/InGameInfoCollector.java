@@ -89,7 +89,7 @@ public class InGameInfoCollector {
 
         for (InGameInfo info : infoBuffer) {
             String infoPlayer = info.getPlayerName();
-            if (infoPlayer != null && infoPlayer.equalsIgnoreCase(playerName ) && now - info.getTimestamp() <= durationMillis) {
+            if (infoPlayer != null && infoPlayer.equalsIgnoreCase(playerName) && now - info.getTimestamp() <= durationMillis) {
                 result.add(info);
             }
         }
@@ -99,11 +99,16 @@ public class InGameInfoCollector {
 
     //按服务器获取信息
     public List<InGameInfo> getInfoByServer(String serverName, long durationMillis) {
+        if (serverName == null) {
+            return new ArrayList<>();
+        }
+
         long now = System.currentTimeMillis();
         List<InGameInfo> result = new ArrayList<>();
 
         for (InGameInfo message : infoBuffer) {
-            if (message.getServerName().equalsIgnoreCase(serverName) && now - message.getTimestamp() <= durationMillis) {
+            String messageServer = message.getServerName();
+            if (messageServer != null && messageServer.equalsIgnoreCase(serverName) && now - message.getTimestamp() <= durationMillis) {
                 result.add(message);
             }
         }

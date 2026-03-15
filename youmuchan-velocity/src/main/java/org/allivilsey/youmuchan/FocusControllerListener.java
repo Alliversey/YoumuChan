@@ -30,6 +30,6 @@ public class FocusControllerListener {
 
     @Subscribe
     public void onPlayerPunishment(LiteBansPunishmentEvent event) {
-        focusController.addFocus(event.getExecutorName(), 6.0);
+        focusController.addFocus(event.getExecutorName(), 3.0);
     }
 }

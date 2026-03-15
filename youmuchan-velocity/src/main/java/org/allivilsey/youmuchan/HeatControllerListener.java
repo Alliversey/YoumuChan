@@ -47,10 +47,11 @@ public class HeatControllerListener {
         }
     }
 
+    @Subscribe
     public void onPlayerPunished(LiteBansPunishmentEvent event) {
 
         String player = event.getExecutorName();
-        heatController.addFuel(6.0, player);
+        heatController.addFuel(3.0, player);
     }
 }
 
