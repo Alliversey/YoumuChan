@@ -21,7 +21,7 @@ import java.nio.file.Path;
 
 // 插件入口：加载配置并装配采集、决策、推理与消息发送组件
 @Plugin(id = "youmuchan", name = "YoumuChan", version = "2.1", authors = { "Allivilsey" }, dependencies = {
-        @Dependency(id = "luckperms"),
+        @Dependency(id = "luckperms", optional = true),
         @Dependency(id = "litebans", optional = true)
 })
 public class YoumuChan {

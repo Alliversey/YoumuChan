@@ -40,8 +40,8 @@ public class HanreiFormatter {
         JsonObject root = new JsonObject();
         root.addProperty("fuel", info.getFuel());
         root.addProperty("player_name", info.getFuelPlayerName());
-        root.addProperty("timestamp", info.getTimestamp());
 
         return root.toString();
     }
 }
+

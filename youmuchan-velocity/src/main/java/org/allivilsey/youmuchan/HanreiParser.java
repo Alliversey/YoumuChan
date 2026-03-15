@@ -78,9 +78,8 @@ public class HanreiParser {
 
         double fuel = Double.parseDouble(getString(root, "fuel"));
         String playerName = getString(root, "player_name");
-        long timestamp = Long.parseLong(getString(root, "timestamp"));
 
-        heatController.addFuel(fuel, playerName, timestamp);
+        heatController.addFuel(fuel, playerName);
     }
 
     private static JsonObject parseObject(String payload) {
@@ -110,3 +109,4 @@ public class HanreiParser {
         }
     }
 }
+

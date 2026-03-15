@@ -26,7 +26,8 @@ public class HeatController {
     }
 
     // 增加 fuel 前先做一次衰减，保证不同事件在统一时间基准下叠加
-    public synchronized void addFuel(double f, String player, long timestamp) {
+    public synchronized void addFuel(double f, String player) {
+        long timestamp = System.currentTimeMillis();
         decay();
         recordPlayer(player, timestamp);
         // 根据活跃玩家数量修改 fuel 添加倍率
