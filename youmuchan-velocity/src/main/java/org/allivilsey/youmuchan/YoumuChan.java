@@ -21,7 +21,8 @@ import java.nio.file.Path;
 
 // 插件入口：加载配置并装配采集、决策、推理与消息发送组件
 @Plugin(id = "youmuchan", name = "YoumuChan", version = "2.1", authors = { "Allivilsey" }, dependencies = {
-        @Dependency(id = "luckperms")
+        @Dependency(id = "luckperms"),
+        @Dependency(id = "litebans", optional = true)
 })
 public class YoumuChan {
 
@@ -36,6 +37,7 @@ public class YoumuChan {
     private InGameInfoCollector collector;
     private FocusController focusController;
     private Hanrei hanrei;
+    private LiteBansPunishmentEventBridge liteBansPunishmentEventBridge;
 
     @Inject
     public YoumuChan(ProxyServer proxyServer, Logger logger, @DataDirectory Path dataDirectory) {
@@ -74,6 +76,8 @@ public class YoumuChan {
 
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) {
+        disableLiteBansBridge();
+
         if (hanrei != null) {
             hanrei.stopHanrei();
             hanrei = null;
@@ -97,6 +101,7 @@ public class YoumuChan {
             hanrei = null;
         }
 
+        disableLiteBansBridge();
         proxyServer.getEventManager().unregisterListeners(this);
 
         try {
@@ -152,6 +157,10 @@ public class YoumuChan {
         proxyServer.getEventManager().register(this, new InGameInfoListener(collector));
         proxyServer.getEventManager().register(this, new HeatControllerListener(heatController, focusController));
         proxyServer.getEventManager().register(this, new FocusControllerListener(focusController));
+
+        // 将 LiteBans 惩罚事件转发为可被 @Subscribe 监听的 Velocity 事件
+        liteBansPunishmentEventBridge = new LiteBansPunishmentEventBridge(proxyServer, logger);
+        liteBansPunishmentEventBridge.register();
 
         // 上下文构建层：从采集信息生成模型输入上下文
         AIContextBuilder contextBuilder = new AIContextBuilder(
@@ -356,6 +365,15 @@ public class YoumuChan {
 
     public Logger getLogger() {
         return logger;
+    }
+
+    private void disableLiteBansBridge() {
+        if (liteBansPunishmentEventBridge == null) {
+            return;
+        }
+
+        liteBansPunishmentEventBridge.unregister();
+        liteBansPunishmentEventBridge = null;
     }
 
     // 加载配置文件；不存在时先写入默认模板
