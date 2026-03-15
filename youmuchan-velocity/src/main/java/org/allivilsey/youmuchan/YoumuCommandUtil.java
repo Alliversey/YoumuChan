@@ -16,8 +16,6 @@ import java.util.concurrent.CompletableFuture;
 
 public final class YoumuCommandUtil {
 
-
-
     private YoumuCommandUtil() {
     }
 
