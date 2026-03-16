@@ -146,12 +146,12 @@ public class YoumuChan {
         // 热度层：根据玩家行为动态调整 AI 调度节奏
         HeatController heatController = new HeatController(halfLifeSeconds, cacheDurationMs);
 
+        // 专注层：追踪玩家活跃度并决定 AI 关注目标
+        this.focusController = new FocusController();
+
         // 启动 Paper -> Velocity TCP 接收器
         hanrei = new Hanrei(logger, tcpHost, tcpPort, collector, heatController, focusController);
         hanrei.startHanrei();
-
-        // 专注层：追踪玩家活跃度并决定 AI 关注目标
-        this.focusController = new FocusController();
 
         // 注册事件监听器
         proxyServer.getEventManager().register(this, new InGameInfoListener(collector));
@@ -159,7 +159,7 @@ public class YoumuChan {
         proxyServer.getEventManager().register(this, new FocusControllerListener(focusController));
 
         // 将 LiteBans 惩罚事件转发为可被 @Subscribe 监听的 Velocity 事件
-        liteBansPunishmentEventBridge = new LiteBansPunishmentEventBridge(proxyServer, logger);
+        liteBansPunishmentEventBridge = new LiteBansPunishmentEventBridge(proxyServer, logger, hanrei);
         liteBansPunishmentEventBridge.register();
 
         // 上下文构建层：从采集信息生成模型输入上下文

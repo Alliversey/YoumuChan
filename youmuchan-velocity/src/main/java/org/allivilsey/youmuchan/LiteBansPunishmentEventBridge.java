@@ -1,5 +1,6 @@
 package org.allivilsey.youmuchan;
 
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import litebans.api.Entry;
 import litebans.api.Events;
@@ -14,12 +15,14 @@ public class LiteBansPunishmentEventBridge {
 
     private final ProxyServer proxyServer;
     private final Logger logger;
+    private final Hanrei hanrei;
     private final Events.Listener listener;
     private boolean registered;
 
-    public LiteBansPunishmentEventBridge(ProxyServer proxyServer, Logger logger) {
+    public LiteBansPunishmentEventBridge(ProxyServer proxyServer, Logger logger, Hanrei hanrei) {
         this.proxyServer = proxyServer;
         this.logger = logger;
+        this.hanrei = hanrei;
         this.listener = new Events.Listener() {
             @Override
             public void entryAdded(Entry entry) {
@@ -101,23 +104,14 @@ public class LiteBansPunishmentEventBridge {
         }
 
         String playerName = proxyServer.getPlayer(uuid)
-                .map(player -> sanitizeResolvedName(player.getUsername()))
+                .map(Player::getUsername)
                 .orElse(null);
 
         if (playerName != null) {
             return playerName;
         } else {
-
+            return trimToNull(hanrei.sendPlayerNameRequest(uuid.toString()));
         }
-        return null;
-    }
-
-    private String sanitizeResolvedName(String name) {
-        String trimmedName = trimToNull(name);
-        if (trimmedName == null) {
-            return null;
-        }
-        return trimmedName;
     }
 
     private UUID parseUuid(String value) {

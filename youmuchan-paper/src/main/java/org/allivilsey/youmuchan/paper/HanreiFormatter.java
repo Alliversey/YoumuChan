@@ -43,5 +43,16 @@ public class HanreiFormatter {
 
         return root.toString();
     }
+
+    public static String formatPlayerNameResponse(String requestId, String playerName) {
+        if (requestId == null || requestId.isBlank()) {
+            return null;
+        }
+
+        JsonObject root = new JsonObject();
+        root.addProperty("request_id", requestId);
+        root.addProperty("player_name", playerName);
+        return root.toString();
+    }
 }
 
