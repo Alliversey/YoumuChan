@@ -67,8 +67,8 @@ public class LiteBansPunishmentEventBridge {
         String punishedPlayerUuid = trimToNull(entry.getUuid());
         String operatorUuid = removed ? trimToNull(entry.getRemovedByUUID()) : trimToNull(entry.getExecutorUUID());
         Instant expireTime = resolveExpireTime(entry, removed);
-        String punishedPlayerName = resolvePlayerNameFromVelocity(punishedPlayerUuid);
-        String executorName = resolvePlayerNameFromVelocity(operatorUuid);
+        String punishedPlayerName = resolvePlayerName(punishedPlayerUuid);
+        String executorName = resolvePlayerName(operatorUuid);
 
         LiteBansPunishmentEvent event = new LiteBansPunishmentEvent(
                 entry.getType(),
@@ -94,7 +94,7 @@ public class LiteBansPunishmentEventBridge {
     }
 
     // 通过 uuid 向 Velocity 查询在线玩家名
-    private String resolvePlayerNameFromVelocity(String uuidText) {
+    private String resolvePlayerName(String uuidText) {
         UUID uuid = parseUuid(uuidText);
         if (uuid == null) {
             return null;
