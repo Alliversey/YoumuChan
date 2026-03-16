@@ -180,12 +180,14 @@ Velocity 代理服:
 | `/youmu debug` | `youmuchan.debug` | 切换 Debug 模式开关 |
 | `/youmu debug info` | `youmuchan.debug` | 切换 BossBar 实时状态面板（仅玩家可用） |
 | `/youmu clear` | `youmuchan.clear` | 清除聊天记录缓存 |
-| `/youmu mute` | `youmu.visible` | 开关自己的 AI 发言显示状态 |
+| `/youmu mute` | 无（玩家可用） | 开关自己的 AI 发言显示状态（需 LuckPerms 已就绪） |
 | `/youmu mute <玩家名或UUID>` | `youmu.muteplayer` | 开关指定玩家的 AI 发言显示状态 |
 | `/youmu setmodel border <name>` | `youmuchan.setmodel` | 热更新边界分析模型 |
 | `/youmu setmodel youmu <name>` | `youmuchan.setmodel` | 热更新主对话模型 |
 | `/youmu setkey <api_key>` | `youmuchan.setkey` | 热更新 API Key |
 | `/youmu seturl <api_url>` | `youmuchan.seturl` | 热更新 API URL |
+
+说明：`youmu.visible` 是 LuckPerms 上用于控制“是否可见 AI 发言”的数据节点，不是命令权限节点。
 
 ---
 
