@@ -26,10 +26,14 @@ import java.nio.file.Path;
 })
 public class YoumuChan {
 
+    private static final String LUCKPERMS_PLUGIN_ID = "luckperms";
+    private static final String LITEBANS_PLUGIN_ID = "litebans";
+
     private final ProxyServer proxyServer;
     private final Logger logger;
     private final Path dataDirectory;
     private LuckPerms luckPerms;
+    private boolean liteBansAvailable;
 
     private GhostInThePlugin ghostInThePlugin;
     private MentalStateController mentalStateController;
@@ -56,12 +60,7 @@ public class YoumuChan {
             return;
         }
 
-        try {
-            luckPerms = LuckPermsProvider.get();
-        } catch (IllegalStateException e) {
-            logger.error("LuckPerms 未加载，无法初始化权限控制", e);
-            return;
-        }
+        detectOptionalDependencies();
 
         startPlugin();
 
@@ -104,12 +103,7 @@ public class YoumuChan {
         disableLiteBansBridge();
         proxyServer.getEventManager().unregisterListeners(this);
 
-        try {
-            luckPerms = LuckPermsProvider.get();
-        } catch (IllegalStateException e) {
-            logger.error("LuckPerms 未加载，无法初始化权限控制", e);
-            return;
-        }
+        detectOptionalDependencies();
 
         startPlugin();
 
@@ -158,9 +152,7 @@ public class YoumuChan {
         proxyServer.getEventManager().register(this, new HeatControllerListener(heatController, focusController));
         proxyServer.getEventManager().register(this, new FocusControllerListener(focusController));
 
-        // 将 LiteBans 惩罚事件转发为可被 @Subscribe 监听的 Velocity 事件
-        liteBansPunishmentEventBridge = new LiteBansPunishmentEventBridge(proxyServer, logger, hanrei);
-        liteBansPunishmentEventBridge.register();
+        enableLiteBansBridge();
 
         // 上下文构建层：从采集信息生成模型输入上下文
         AIContextBuilder contextBuilder = new AIContextBuilder(
@@ -374,6 +366,86 @@ public class YoumuChan {
 
         liteBansPunishmentEventBridge.unregister();
         liteBansPunishmentEventBridge = null;
+    }
+
+    // 启动时探测可选依赖，缺失时关闭对应模块
+    private void detectOptionalDependencies() {
+        detectLuckPerms();
+        detectLiteBans();
+    }
+
+    // 探测 LuckPerms 并决定权限模块是否启用
+    private void detectLuckPerms() {
+        luckPerms = null;
+
+        if (!isPluginPresent(LUCKPERMS_PLUGIN_ID)) {
+            logger.warn("未检测到 LuckPerms，权限控制模块已关闭");
+            return;
+        }
+
+        if (!isClassAvailable("net.luckperms.api.LuckPermsProvider")) {
+            logger.warn("检测到 LuckPerms 插件，但 API 类不可用，权限控制模块已关闭");
+            return;
+        }
+
+        try {
+            luckPerms = LuckPermsProvider.get();
+            logger.info("LuckPerms 已就绪，权限控制模块已启用");
+        } catch (IllegalStateException e) {
+            logger.warn("LuckPerms 插件未就绪，权限控制模块已关闭", e);
+        } catch (Throwable throwable) {
+            logger.error("初始化 LuckPerms 失败，权限控制模块已关闭", throwable);
+        }
+    }
+
+    // 探测 LiteBans 并决定惩罚事件模块是否启用
+    private void detectLiteBans() {
+        if (!isPluginPresent(LITEBANS_PLUGIN_ID)) {
+            liteBansAvailable = false;
+            logger.warn("未检测到 LiteBans，惩罚事件模块已关闭");
+            return;
+        }
+
+        if (!isClassAvailable("litebans.api.Events") || !isClassAvailable("litebans.api.Events$Listener")) {
+            liteBansAvailable = false;
+            logger.warn("检测到 LiteBans 插件，但 API 类不可用，惩罚事件模块已关闭");
+            return;
+        }
+
+        liteBansAvailable = true;
+        logger.info("LiteBans 已就绪，惩罚事件模块已启用");
+    }
+
+    // 按依赖探测结果启用 LiteBans 事件桥接
+    private void enableLiteBansBridge() {
+        if (!liteBansAvailable) {
+            return;
+        }
+
+        try {
+            // 仅在依赖就绪时实例化，避免缺失依赖导致类加载失败
+            liteBansPunishmentEventBridge = new LiteBansPunishmentEventBridge(proxyServer, logger, hanrei);
+            liteBansPunishmentEventBridge.register();
+        } catch (Throwable throwable) {
+            liteBansPunishmentEventBridge = null;
+            liteBansAvailable = false;
+            logger.error("初始化 LiteBans 惩罚事件模块失败，已关闭对应功能", throwable);
+        }
+    }
+
+    // 根据插件 id 判断是否已安装并加载
+    private boolean isPluginPresent(String pluginId) {
+        return proxyServer.getPluginManager().getPlugin(pluginId).isPresent();
+    }
+
+    // 安全探测类是否可由当前插件类加载器解析
+    private boolean isClassAvailable(String className) {
+        try {
+            Class.forName(className, false, getClass().getClassLoader());
+            return true;
+        } catch (ClassNotFoundException | LinkageError ignored) {
+            return false;
+        }
     }
 
     // 加载配置文件；不存在时先写入默认模板
